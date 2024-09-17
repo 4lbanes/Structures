@@ -7,6 +7,12 @@ class DynamicStack:
         self.size_max = initial_size  
     
     def push(self, item): 
+        try:
+            item = int(item)  # Converte o item para inteiro
+        except ValueError:
+            print("Por favor, insira um número válido.")
+            return
+        
         if self.is_full():
             self.resize()  # Redimensiona a pilha quando cheia
         self.itens.append(item)
@@ -50,11 +56,16 @@ class DynamicStack:
             stack_list.append(self.itens[i])
         return stack_list
     
+    # Função de ordenação da pilha
+    def sort_stack(self):
+        self.itens.sort() 
+        print("A stack foi ordenada.")
+    
 
 # Interface com Tkinter
 class DynamicStackGUI:
-    def __init__(self, root, initial_size):
-        self.stack = DynamicStack(initial_size)  
+    def __init__(self, root, stack):
+        self.stack = stack  
         self.root = root
         self.root.title("Pilha Dinâmica")
         
@@ -69,8 +80,11 @@ class DynamicStackGUI:
         self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop)
         self.button_pop.grid(row=3, column=0, columnspan=2)
         
+        self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack)
+        self.button_sort.grid(row=4, column=0, columnspan=2)
+        
         self.stack_display = tk.Text(root, height=10, width=30)
-        self.stack_display.grid(row=4, column=0, columnspan=2)
+        self.stack_display.grid(row=5, column=0, columnspan=2)
         
         self.update_stack_display()
     
@@ -92,6 +106,10 @@ class DynamicStackGUI:
         else:
             messagebox.showwarning("Aviso", "A pilha está vazia.")
         self.update_stack_display()
+
+    def sort_stack(self):
+        self.stack.sort_stack()
+        self.update_stack_display()
     
     def update_stack_display(self):
         self.stack_display.delete(1.0, tk.END)
@@ -107,10 +125,10 @@ class DynamicStackGUI:
                 else:
                     self.stack_display.insert(tk.END, f"        {data}\n")
                     
+# Criação da pilha e da interface
 ds = DynamicStack(5)
 
 # Criação da interface
 root = tk.Tk()
 app = DynamicStackGUI(root, ds)
 root.mainloop()
-

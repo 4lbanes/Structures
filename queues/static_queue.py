@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox
 
 class StaticQueue:
     def __init__(self, max_size):
@@ -71,6 +71,7 @@ class StaticQueueGUI:
         self.queue_display.grid(row=4, column=0, columnspan=2)
         
         self.update_queue_display()
+        self.update_buttons_visibility() 
     
     def enqueue(self):
         data = self.entry_data.get()
@@ -87,10 +88,7 @@ class StaticQueueGUI:
         self.update_queue_display()
         self.entry_data.delete(0, tk.END)
         
-        if self.queue.is_full():
-            self.label_data.grid_remove()
-            self.entry_data.grid_remove()
-            self.button_enqueue.grid_remove()
+        self.update_buttons_visibility() 
 
     def dequeue(self):
         removed = self.queue.dequeue()
@@ -99,11 +97,8 @@ class StaticQueueGUI:
         else:
             messagebox.showwarning("Aviso", "A fila está vazia.")
         self.update_queue_display()
-    
-        if not self.queue.is_full():
-            self.label_data.grid()
-            self.entry_data.grid()
-            self.button_enqueue.grid()
+        
+        self.update_buttons_visibility()  
 
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
@@ -118,18 +113,26 @@ class StaticQueueGUI:
                     self.queue_display.insert(tk.END, f"Base -> {data}\n")
                 else:
                     self.queue_display.insert(tk.END, f"        {data}\n")
-                    
-def start_app():
-    root = tk.Tk()
+    
+    def update_buttons_visibility(self):    
+        if self.queue.is_empty():
+            # Se a fila estiver vazia, ocultar o botão de remoção
+            self.button_dequeue.grid_remove()
+        else:
+            self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
 
-    max_size = simpledialog.askinteger("Tamanho da Fila", "Digite o tamanho máximo da fila:", minvalue=1)
+        if self.queue.is_full():
+            # Se a fila estiver cheia, ocultar o botão de inserção
+            self.button_enqueue.grid_remove()
+            self.label_data.grid_remove()
+            self.entry_data.grid_remove()
+        else:
+            # Se a fila não estiver cheia, garantir que o botão de inserção apareça
+            self.button_enqueue.grid()
+            self.label_data.grid()
+            self.entry_data.grid()
 
-    if max_size is None:
-        messagebox.showerror("Erro", "Você precisa inserir um tamanho válido!")
-        root.destroy() 
-    else:
-        app = StaticQueueGUI(root, max_size)
-        root.mainloop()
-
-# Execução da aplicação
-start_app()
+# Criação da fila e da interface
+root = tk.Tk()
+app = StaticQueueGUI(root, 5)
+root.mainloop()

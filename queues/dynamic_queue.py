@@ -79,6 +79,7 @@ class DynamicQueueGUI:
         self.queue_display.grid(row=4, column=0, columnspan=2)
         
         self.update_queue_display()
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões ao iniciar
     
     def enqueue(self):
         data = self.entry_data.get()
@@ -90,6 +91,8 @@ class DynamicQueueGUI:
         self.queue.enqueue(data)
         self.update_queue_display()
         self.entry_data.delete(0, tk.END)  
+        
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após inserção
     
     def dequeue(self):
         removed = self.queue.dequeue()
@@ -98,6 +101,8 @@ class DynamicQueueGUI:
         else:
             messagebox.showwarning("Aviso", "A fila está vazia.")
         self.update_queue_display()
+        
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após remoção
     
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
@@ -112,7 +117,12 @@ class DynamicQueueGUI:
                     self.queue_display.insert(tk.END, f"Base -> {data}\n")
                 else:
                     self.queue_display.insert(tk.END, f"        {data}\n")
-
+    
+    def update_buttons_visibility(self):
+        if self.queue.is_empty():
+            self.button_dequeue.grid_remove()  
+        else:
+            self.button_dequeue.grid() 
 
 # Execução da interface gráfica
 root = tk.Tk()

@@ -88,6 +88,7 @@ class PriorityQueueGUI:
         self.queue_display.grid(row=4, column=0, columnspan=2)
         
         self.update_queue_display()
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões ao iniciar
     
     def enqueue(self):
         data = self.entry_data.get()
@@ -98,15 +99,17 @@ class PriorityQueueGUI:
             return
         
         try:
-            priority = int(priority)
+            priority = int(priority)  # Converte prioridade para inteiro
         except ValueError:
-            messagebox.showerror("Erro", "Prioridade deve ser um número inteiro!")
+            messagebox.showerror("Erro", "Prioridade deve ser um número inteiro.")
             return
         
         self.queue.enqueue(data, priority)
         self.update_queue_display()
-        self.entry_data.delete(0, tk.END)
-        self.entry_priority.delete(0, tk.END)
+        self.entry_data.delete(0, tk.END)  
+        self.entry_priority.delete(0, tk.END)  # Limpa o campo de prioridade
+        
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após inserção
     
     def dequeue(self):
         removed = self.queue.dequeue()
@@ -115,7 +118,9 @@ class PriorityQueueGUI:
         else:
             messagebox.showwarning("Aviso", "A fila está vazia.")
         self.update_queue_display()
-    
+        
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após remoção
+        
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
         queue_list = self.queue.print_queue()
@@ -129,6 +134,13 @@ class PriorityQueueGUI:
                     self.queue_display.insert(tk.END, f"Base -> {data}, Prioridade: {priority}\n")
                 else:
                     self.queue_display.insert(tk.END, f"        {data}, Prioridade: {priority}\n")
+                    
+    def update_buttons_visibility(self):
+        """Atualiza a visibilidade do botão de remoção com base no estado da fila."""
+        if self.queue.is_empty():
+            self.button_dequeue.grid_remove()  # Esconde o botão de remoção se a fila estiver vazia
+        else:
+            self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
 
 # Execução da interface gráfica
 root = tk.Tk()
