@@ -46,12 +46,17 @@ class StaticQueue:
             queue_list.append(self.itens[i])
         return queue_list
 
+    def sort_queue(self):
+        # Ordena a fila priorizando strings
+        self.itens.sort(key=lambda x: (isinstance(x, str), x))
+        print("A fila foi ordenada.")
+
 # Interface com Tkinter
 class StaticQueueGUI:
     def __init__(self, root, max_size):
         self.queue = StaticQueue(max_size)  # Tamanho máximo da fila fornecido na inicialização
         self.root = root
-        self.root.title("Fila Estática")
+        self.root.title("Fila Estática: ")
         
         self.label_max_size = tk.Label(root, text=f"Tamanho máximo da fila: {max_size}")
         self.label_max_size.grid(row=0, column=0, columnspan=2)
@@ -66,6 +71,9 @@ class StaticQueueGUI:
         
         self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)
         self.button_dequeue.grid(row=3, column=0, columnspan=2)
+
+        self.button_sort = tk.Button(root, text="Ordenar a Fila", command=self.sort_queue)
+        self.button_sort.grid(row=3, column=2)  # Adiciona o botão de ordenação à grade
         
         self.queue_display = tk.Text(root, height=10, width=30)
         self.queue_display.grid(row=4, column=0, columnspan=2)
@@ -100,6 +108,12 @@ class StaticQueueGUI:
         
         self.update_buttons_visibility()  
 
+    def sort_queue(self):
+        if not self.queue.is_empty():
+            self.queue.sort_queue()  
+            self.update_queue_display()
+            messagebox.showinfo("Ordenação", "A fila foi ordenada.")
+
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
         queue_list = self.queue.print_queue()
@@ -116,10 +130,12 @@ class StaticQueueGUI:
     
     def update_buttons_visibility(self):    
         if self.queue.is_empty():
-            # Se a fila estiver vazia, ocultar o botão de remoção
+            # Se a fila estiver vazia, ocultar o botão de remoção e de ordenação
             self.button_dequeue.grid_remove()
+            self.button_sort.grid_remove()
         else:
             self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
+            self.button_sort.grid()      # Mostra o botão de ordenação se a fila não estiver vazia
 
         if self.queue.is_full():
             # Se a fila estiver cheia, ocultar o botão de inserção
@@ -136,3 +152,4 @@ class StaticQueueGUI:
 root = tk.Tk()
 app = StaticQueueGUI(root, 5)
 root.mainloop()
+

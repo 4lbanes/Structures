@@ -8,6 +8,12 @@ class StaticStack:
     
     def push(self, item):
         if not self.is_full():
+            # Tenta converter o item para float, se não for um número mantém como string
+            try:
+                item = float(item)
+            except ValueError:
+                pass  # Mantém como string se não puder ser convertido
+
             self.items.append(item)
             print(f"{item} foi adicionado à stack.")
         else:
@@ -42,14 +48,19 @@ class StaticStack:
     
     # Função de ordenação da pilha
     def sort_stack(self):
-        self.items.sort()  # Ordena a pilha em ordem crescente
+        def custom_sort(item):
+            if isinstance(item, str):
+                return (0, item)  # Prioriza strings
+            return (1, item)  # Números são secundários
+
+        self.items.sort(key=custom_sort)  # Ordena a pilha
         print("A pilha foi ordenada.")
 
 class StaticStackGUI:    
     def __init__(self, root, max_size):
         self.stack = StaticStack(max_size)  
         self.root = root
-        self.root.title("Pilha Estática")
+        self.root.title("Pilha Estática: ")
         
         self.label_max_size = tk.Label(root, text=f"Tamanho máximo da pilha: {self.stack.max_size}")
         self.label_max_size.grid(row=0, column=0, columnspan=2)
@@ -79,13 +90,6 @@ class StaticStackGUI:
         
         if not data:
             messagebox.showerror("Erro", "Preencha o campo de elemento!")
-            return
-
-        try:
-            # Converte a entrada para inteiro antes de adicionar à pilha
-            data = int(data)
-        except ValueError:
-            messagebox.showerror("Erro", "O elemento deve ser um número inteiro!")
             return
         
         self.stack.push(data)
@@ -124,21 +128,16 @@ class StaticStackGUI:
                     self.stack_display.insert(tk.END, f"        {data}\n")
     
     def update_buttons_visibility(self):
-        
         if self.stack.is_empty():
-            # Se a pilha estiver vazia, ocultar os botões de remoção e ordenação
             self.button_pop.grid_remove()
             self.button_sort.grid_remove()
         else:
-            # Se a pilha não estiver vazia, garantir que os botões de remoção e ordenação apareçam
             self.button_pop.grid()
             self.button_sort.grid()
         
         if self.stack.is_full():
-            # Se a pilha estiver cheia, ocultar o botão de inserção
             self.button_push.grid_remove()
         else:
-            # Se a pilha não estiver cheia, garantir que o botão de inserção apareça
             self.button_push.grid()
 
 # Criação da pilha e da interface

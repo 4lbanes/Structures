@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox
 
 class Node:
     def __init__(self, data):
@@ -8,7 +8,6 @@ class Node:
         self.prev = None
 
 class CircularDoublyLinkedList:
-    
     def __init__(self, max_size):
         self.size_max = max_size
         self.size = 0
@@ -124,18 +123,67 @@ class CircularDoublyLinkedList:
             current = current.next
         
         return current
+    
+    def to_list(self):
+        """Converte a lista encadeada em uma lista Python."""
+        result = []
+        current = self.head
+        if not self.is_empty():
+            for _ in range(self.size):
+                result.append(current.data)
+                current = current.next
+        return result
+
+    def from_list(self, lst):
+        """Cria uma lista encadeada a partir de uma lista Python."""
+        self.head = None
+        self.tail = None
+        self.size = 0
+        for data in lst:
+            self.add(data)
+            
+    def sort(self):
+        if self.is_empty() or self.size == 1:
+            return
+
+        # Converte a lista encadeada para uma lista Python
+        lst = self.to_list()
+
+        def convert_if_possible(item):
+            # Tenta converter para float, se falhar, mantém como string
+            try:
+                return float(item)
+            except ValueError:
+                return item
+
+        # Converte os dados para números quando possível, mantendo strings intactas
+        lst_converted = [(convert_if_possible(item), item) for item in lst]
+
+        # Função personalizada para a ordenação
+        def custom_key(item):
+            converted_value, original_value = item
+            # Prioriza strings sobre números
+            return (isinstance(converted_value, float), converted_value)
+
+        # Ordena a lista Python com base no valor convertido
+        lst_converted.sort(key=custom_key)
+
+        # Recria a lista encadeada a partir da lista Python ordenada
+        sorted_lst = [item[1] for item in lst_converted]
+        self.from_list(sorted_lst)
+
     def __str__(self):
-     if self.is_empty():
-        return "A lista está vazia"
+        if self.is_empty():
+            return "A lista está vazia"
 
-     current = self.head
-     elements = []
-     for _ in range(self.size):
-        elements.append(str(current.data))
-        current = current.next
+        current = self.head
+        elements = []
+        for _ in range(self.size):
+            elements.append(str(current.data))
+            current = current.next
 
-    # Adicionando a ligação circular explícita
-     return " <-> ".join(elements) + f" (circular: head.prev -> {self.tail.data}, tail.next -> {self.head.data})"
+        # Adicionando a ligação circular explícita
+        return " <-> ".join(elements) + f" (circular: head.prev -> {self.tail.data}, tail.next -> {self.head.data})"
 
 # Interface gráfica com Tkinter
 class CircularDoublyLinkedListGUI:
@@ -144,10 +192,7 @@ class CircularDoublyLinkedListGUI:
         self.root = root
         self.root.title("Listas Circulares: ")
 
-        # Widgets
-        self.label_max_size = tk.Label(root, text=f"Tamanho máximo da lista: {max_size}")
-        self.label_max_size.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky='w')
-        
+        # Widgets        
         self.label_data = tk.Label(root, text="Elemento:")
         self.label_data.grid(row=1, column=0, padx=10, pady=5, sticky='w')
         self.entry_data = tk.Entry(root)
@@ -172,6 +217,9 @@ class CircularDoublyLinkedListGUI:
         self.label_index.grid(row=4, column=0, padx=10, pady=5, sticky='w')
         self.entry_index = tk.Entry(root)
         self.entry_index.grid(row=4, column=1, padx=10, pady=5, sticky='ew')
+        
+        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort)
+        self.button_sort.grid(row=4, column=2, padx=10, pady=5)
         
         self.stack_display = tk.Text(root, height=20, width=100)
         self.stack_display.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
@@ -218,25 +266,28 @@ class CircularDoublyLinkedListGUI:
         self.list.remove_by_index(index)
         self.update_list_display()
     
+    def sort(self):
+        self.list.sort()
+        self.update_list_display()
+    
     def update_buttons_visibility(self):
         if self.list.is_empty():
             self.button_remove_first.grid_forget()
             self.button_remove_last.grid_forget()
             self.button_remove_by_index.grid_forget()
+            self.button_sort.grid_forget()  # Oculta o botão de ordenação se a lista estiver vazia
         else:
             self.button_remove_first.grid(row=3, column=0, padx=10, pady=5)
             self.button_remove_last.grid(row=3, column=1, padx=10, pady=5)
             self.button_remove_by_index.grid(row=3, column=2, padx=10, pady=5)
-    
+            self.button_sort.grid(row=4, column=2, padx=10, pady=5)  # Mostra o botão de ordenação
+
     def update_list_display(self):
         self.stack_display.delete(1.0, tk.END)
         self.stack_display.insert(tk.END, str(self.list) + "\n")
         self.update_buttons_visibility()
 
-
-cldl = CircularDoublyLinkedList(5)
-
 # Criação da interface
 root = tk.Tk()
-app = CircularDoublyLinkedListGUI(root, cldl)
+app = CircularDoublyLinkedListGUI(root, 5)
 root.mainloop()

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox
 
 class Node:
     def __init__(self, data):
@@ -167,7 +167,54 @@ class DoublyLinkedList:
             if self.get(i) == data:
                 self.remove_by_index(i)
                 break
+
+    def to_list(self):
+        """Converte a lista encadeada em uma lista Python."""
+        result = []
+        current = self.head
+        while current:
+            result.append(current.data)
+            current = current.next
+        return result
+
+    def from_list(self, lst):
+        """Cria uma lista encadeada a partir de uma lista Python."""
+        self.head = None
+        self.tail = None
+        self.size = 0
+        for data in lst:
+            self.add(data)
             
+    def sort(self):
+        if self.is_empty() or self.size == 1:
+            return
+
+        # Converte a lista encadeada para uma lista Python
+        lst = self.to_list()
+
+        def convert_if_possible(item):
+            # Tenta converter para float, se falhar, mantém como string
+            try:
+                return float(item)
+            except ValueError:
+                return item
+
+        # Converte os dados para números quando possível, mantendo strings intactas
+        lst_converted = [(convert_if_possible(item), item) for item in lst]
+
+        # Função personalizada para a ordenação
+        def custom_key(item):
+            converted_value, original_value = item
+            # Prioriza strings sobre números
+            return (isinstance(converted_value, float), converted_value)
+
+        # Ordena a lista Python com base no valor convertido
+        lst_converted.sort(key=custom_key)
+
+        # Recria a lista encadeada a partir da lista Python ordenada
+        sorted_lst = [item[1] for item in lst_converted]
+        self.from_list(sorted_lst)
+
     def __str__(self):
         if self.is_empty():
             return "A lista está vazia"
@@ -204,11 +251,7 @@ class DoublyLinkedListGUI:
     def __init__(self, root, max_size):
         self.list = DoublyLinkedList(max_size)
         self.root = root
-        self.root.title("Lista Duplamente Encadeada")
-
-        # Definindo o label_max_size para exibir o tamanho máximo da lista
-        self.label_max_size = tk.Label(root, text=f"Tamanho máximo da lista: {max_size}")
-        self.label_max_size.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky='w')
+        self.root.title("Lista Duplamente Encadeada: ")
         
         self.label_data = tk.Label(root, text="Elemento:")
         self.label_data.grid(row=1, column=0, padx=10, pady=5, sticky='w')
@@ -230,16 +273,19 @@ class DoublyLinkedListGUI:
         self.button_remove_by_index = tk.Button(root, text="Remover por Índice", command=self.remove_by_index)
         self.button_remove_by_index.grid(row=3, column=2, padx=10, pady=5)
         
+        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort)
+        self.button_sort.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+
         self.label_index = tk.Label(root, text="Índice:")
-        self.label_index.grid(row=4, column=0, padx=10, pady=5, sticky='w')
+        self.label_index.grid(row=5, column=0, padx=10, pady=5, sticky='w')
         self.entry_index = tk.Entry(root)
-        self.entry_index.grid(row=4, column=1, padx=10, pady=5, sticky='ew')
+        self.entry_index.grid(row=5, column=1, padx=10, pady=5, sticky='ew')
         
         self.stack_display = tk.Text(root, height=20, width=100)
-        self.stack_display.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
+        self.stack_display.grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
         
         # Configure row and column weights to expand widgets
-        root.grid_rowconfigure(5, weight=1)
+        root.grid_rowconfigure(6, weight=1)
         root.grid_columnconfigure(1, weight=1)
         self.update_list_display()
     
@@ -297,9 +343,11 @@ class DoublyLinkedListGUI:
         self.stack_display.insert(tk.END, "Lista Reversa: " + self.list.reverse() + "\n")
         self.update_buttons_visibility()
 
-dll = DoublyLinkedList(5)
+    def sort(self):
+        self.list.sort()
+        self.update_list_display()
 
 # Criação da interface
 root = tk.Tk()
-app = DoublyLinkedListGUI(root, dll)
+app = DoublyLinkedListGUI(root, 5)
 root.mainloop()

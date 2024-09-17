@@ -18,12 +18,12 @@ class PriorityQueue:
     def enqueue(self, data, priority):
         new_node = Node(data, priority)
         
-        if self.is_empty() or self.front.priority > priority:
+        if self.is_empty() or str(self.front.priority) > str(priority):
             new_node.next = self.front
             self.front = new_node
         else:
             current = self.front
-            while current.next and current.next.priority <= priority:
+            while current.next and str(current.next.priority) <= str(priority):
                 current = current.next
             
             new_node.next = current.next
@@ -66,7 +66,7 @@ class PriorityQueueGUI:
     def __init__(self, root):
         self.queue = PriorityQueue()
         self.root = root
-        self.root.title("Fila de Prioridade")
+        self.root.title("Fila de Prioridade: ")
         
         self.label_data = tk.Label(root, text="Elemento:")
         self.label_data.grid(row=0, column=0)
@@ -85,7 +85,7 @@ class PriorityQueueGUI:
         self.button_dequeue.grid(row=3, column=0, columnspan=2)
         
         self.queue_display = tk.Text(root, height=10, width=30)
-        self.queue_display.grid(row=4, column=0, columnspan=2)
+        self.queue_display.grid(row=4, column=0, columnspan=3)
         
         self.update_queue_display()
         self.update_buttons_visibility()  # Atualiza a visibilidade dos botões ao iniciar
@@ -96,12 +96,6 @@ class PriorityQueueGUI:
         
         if not data or not priority:
             messagebox.showerror("Erro", "Preencha todos os campos!")
-            return
-        
-        try:
-            priority = int(priority)  # Converte prioridade para inteiro
-        except ValueError:
-            messagebox.showerror("Erro", "Prioridade deve ser um número inteiro.")
             return
         
         self.queue.enqueue(data, priority)
@@ -120,7 +114,13 @@ class PriorityQueueGUI:
         self.update_queue_display()
         
         self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após remoção
-        
+
+    def sort_queue(self):
+        if not self.queue.is_empty():
+            self.queue.sort_queue()  
+            self.update_queue_display()
+            messagebox.showinfo("Ordenação", "A fila foi ordenada.")
+    
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
         queue_list = self.queue.print_queue()
@@ -136,11 +136,12 @@ class PriorityQueueGUI:
                     self.queue_display.insert(tk.END, f"        {data}, Prioridade: {priority}\n")
                     
     def update_buttons_visibility(self):
-        """Atualiza a visibilidade do botão de remoção com base no estado da fila."""
+        """Atualiza a visibilidade dos botões com base no estado da fila."""
         if self.queue.is_empty():
             self.button_dequeue.grid_remove()  # Esconde o botão de remoção se a fila estiver vazia
         else:
             self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
+            self.button_sort.grid()      # Mostra o botão de ordenação se a fila não estiver vazia
 
 # Execução da interface gráfica
 root = tk.Tk()

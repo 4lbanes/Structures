@@ -46,6 +46,27 @@ class DynamicQueue:
             return None
         return self.front.data
     
+    def sort_queue(self):
+        if self.is_empty():
+            return
+        
+        # Armazena os nós em uma lista
+        nodes = []
+        current = self.front
+        while current:
+            nodes.append(current.data)
+            current = current.next
+        
+        # Ordena priorizando strings e depois números
+        nodes.sort(key=lambda x: (isinstance(x, str), str(x) if isinstance(x, str) else int(x)))
+        
+        # Reconstrói a fila ordenada
+        self.front = None
+        self.rear = None
+        self.size = 0
+        for data in nodes:
+            self.enqueue(data)
+    
     def print_queue(self):
         if self.is_empty():
             return []
@@ -62,7 +83,7 @@ class DynamicQueueGUI:
     def __init__(self, root):
         self.queue = DynamicQueue()
         self.root = root
-        self.root.title("Fila Dinâmica")
+        self.root.title("Fila Dinâmica: ")
         
         self.label_data = tk.Label(root, text="Elemento:")
         self.label_data.grid(row=0, column=0)
@@ -75,8 +96,11 @@ class DynamicQueueGUI:
         self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)
         self.button_dequeue.grid(row=3, column=0, columnspan=2)
         
+        self.button_sort = tk.Button(root, text="Ordenar a Fila", command=self.sort_queue)
+        self.button_sort.grid(row=3, column=2)  # Adiciona o botão de ordenação à grade
+        
         self.queue_display = tk.Text(root, height=10, width=30)
-        self.queue_display.grid(row=4, column=0, columnspan=2)
+        self.queue_display.grid(row=4, column=0, columnspan=3)
         
         self.update_queue_display()
         self.update_buttons_visibility()  # Atualiza a visibilidade dos botões ao iniciar
@@ -104,6 +128,11 @@ class DynamicQueueGUI:
         
         self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após remoção
     
+    def sort_queue(self):
+        self.queue.sort_queue()  # Chama a função de ordenação da fila
+        self.update_queue_display()
+        messagebox.showinfo("Ordenação", "A fila foi ordenada.")
+    
     def update_queue_display(self):
         self.queue_display.delete(1.0, tk.END)
         queue_list = self.queue.print_queue()
@@ -119,10 +148,13 @@ class DynamicQueueGUI:
                     self.queue_display.insert(tk.END, f"        {data}\n")
     
     def update_buttons_visibility(self):
+        """Atualiza a visibilidade dos botões com base no estado da fila."""
         if self.queue.is_empty():
-            self.button_dequeue.grid_remove()  
+            self.button_dequeue.grid_remove()  # Esconde o botão de remoção se a fila estiver vazia
+            self.button_sort.grid_remove()      # Esconde o botão de ordenação se a fila estiver vazia
         else:
-            self.button_dequeue.grid() 
+            self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
+            self.button_sort.grid()      # Mostra o botão de ordenação se a fila não estiver vazia
 
 # Execução da interface gráfica
 root = tk.Tk()
