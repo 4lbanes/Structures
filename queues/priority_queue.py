@@ -141,7 +141,6 @@ class PriorityQueueGUI:
             self.button_dequeue.grid_remove()  # Esconde o botão de remoção se a fila estiver vazia
         else:
             self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
-            self.button_sort.grid()      # Mostra o botão de ordenação se a fila não estiver vazia
 
 # Execução da interface gráfica
 root = tk.Tk()

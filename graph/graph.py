@@ -1,26 +1,25 @@
 import tkinter as tk
 import math
-import time
 
 class Graph:
     def __init__(self):
         self.graph = {}
         self.weights = {}
-    
+
     def add_vertex(self, vertex):
         if vertex not in self.graph:
             self.graph[vertex] = []
-    
+
     def add_edge(self, vertex1, vertex2, weight=1):
         if vertex1 in self.graph and vertex2 in self.graph:
             self.graph[vertex1].append(vertex2)
             self.weights[(vertex1, vertex2)] = weight
-    
+
     def remove_edge(self, vertex1, vertex2):
         if vertex1 in self.graph and vertex2 in self.graph and vertex2 in self.graph[vertex1]:
             self.graph[vertex1].remove(vertex2)
             del self.weights[(vertex1, vertex2)]
-    
+
     def remove_vertex(self, vertex):
         if vertex in self.graph:
             for v in self.graph:
@@ -28,10 +27,10 @@ class Graph:
                     self.graph[v].remove(vertex)
                     del self.weights[(v, vertex)]
             del self.graph[vertex]
-    
+
     def get_vertices(self):
         return list(self.graph.keys())
-    
+
     def get_edges(self):
         edges = []
         for vertex, neighbors in self.graph.items():
@@ -43,48 +42,97 @@ class Graph:
         distances = {vertex: float('infinity') for vertex in self.graph}
         previous_vertices = {vertex: None for vertex in self.graph}
         distances[start_vertex] = 0
-        
+
         unvisited_vertices = set(self.graph.keys())
-        
+
         while unvisited_vertices:
             current_vertex = min(unvisited_vertices, key=lambda vertex: distances[vertex])
             unvisited_vertices.remove(current_vertex)
-            
+
             if distances[current_vertex] == float('infinity'):
                 break
-            
+
             for neighbor in self.graph[current_vertex]:
                 weight = self.weights.get((current_vertex, neighbor), 1)
                 distance = distances[current_vertex] + weight
-                
+
                 if distance < distances[neighbor]:
                     distances[neighbor] = distance
                     previous_vertices[neighbor] = current_vertex
-        
+
         path = []
         current_vertex = end_vertex
-        
+
         while current_vertex is not None:
             path.append(current_vertex)
             current_vertex = previous_vertices[current_vertex]
-        
+
         path = path[::-1]
-        
+
         return path
 
 class GraphGUI(tk.Tk):
     def __init__(self, graph):
         super().__init__()
         self.graph = graph
-        self.title("Graph Visualization with Direction and Dijkstra")
+        self.title("Visualização do Grafo com Dijkstra")
+
+        # Create a main canvas for graph visualization
         self.canvas = tk.Canvas(self, width=600, height=600, bg="white")
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
         self.vertices_pos = self.calculate_positions()
-        self.selected_vertex = None
         self.start_vertex = None
         self.end_vertex = None
-        self.canvas.bind("<Button-1>", self.on_click)
-        self.draw_graph()
+
+        # Create side and bottom frames for organizing the buttons and entries
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Frame lateral para a área de inserção de vértices e arestas
+        side_frame = tk.Frame(self)
+        side_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10, pady=10)
+
+        # Área de inserção de vértices
+        tk.Label(side_frame, text="Inserir vértice:", font=("Arial", 10)).pack(pady=5)
+        self.vertex_entry = tk.Entry(side_frame)
+        self.vertex_entry.pack(pady=5)
+
+        tk.Button(side_frame, text="Inserir", command=self.add_vertex).pack(pady=5)
+
+        # Área de remoção de vértices
+        tk.Label(side_frame, text="Remover vértice:", font=("Arial", 10)).pack(pady=5)
+        self.remove_vertex_entry = tk.Entry(side_frame)
+        self.remove_vertex_entry.pack(pady=5)
+
+        tk.Button(side_frame, text="Remover", command=self.remove_vertex).pack(pady=5)
+
+        # Área de arestas
+        tk.Label(side_frame, text="Aresta sai do vértice:", font=("Arial", 10)).pack(pady=5)
+        self.vertex1_entry = tk.Entry(side_frame)
+        self.vertex1_entry.pack(pady=5)
+
+        tk.Label(side_frame, text="Aresta vai para o vértice:", font=("Arial", 10)).pack(pady=5)
+        self.vertex2_entry = tk.Entry(side_frame)
+        self.vertex2_entry.pack(pady=5)
+
+        tk.Label(side_frame, text="Peso da aresta:", font=("Arial", 10)).pack(pady=5)
+        self.weight_entry = tk.Entry(side_frame)
+        self.weight_entry.pack(pady=5)
+
+        tk.Button(side_frame, text="Adicionar Aresta", command=self.add_edge).pack(pady=5)
+        tk.Button(side_frame, text="Remover Aresta", command=self.remove_edge).pack(pady=5)
+
+        # Área do Dijkstra
+        tk.Label(side_frame, text="Dijkstra - Vértice de início:", font=("Arial", 10)).pack(pady=5)
+        self.start_entry = tk.Entry(side_frame)
+        self.start_entry.pack(pady=5)
+
+        tk.Label(side_frame, text="Dijkstra - Vértice de destino:", font=("Arial", 10)).pack(pady=5)
+        self.end_entry = tk.Entry(side_frame)
+        self.end_entry.pack(pady=5)
+
+        tk.Button(side_frame, text="Encontrar menor caminho", command=self.find_shortest_path).pack(pady=10)
 
     def calculate_positions(self):
         vertices = self.graph.get_vertices()
@@ -99,120 +147,90 @@ class GraphGUI(tk.Tk):
         return positions
 
     def draw_graph(self):
-      self.canvas.delete("all")
-      edges = self.graph.get_edges()
-    
-      for vertex1, vertex2 in edges:
-        x1, y1 = self.vertices_pos[vertex1]
-        x2, y2 = self.vertices_pos[vertex2]
-        
-        dx = x2 - x1
-        dy = y2 - y1
-        dist = math.sqrt(dx**2 + dy**2)
-        norm_dx = dx / dist
-        norm_dy = dy / dist
-        offset = 20
-        
-        arrow_x = x2 - norm_dx * offset
-        arrow_y = y2 - norm_dy * offset
-        
-        self.canvas.create_line(x1, y1, arrow_x, arrow_y, fill="black", width=2, arrow=tk.LAST)
-        weight = self.graph.weights.get((vertex1, vertex2), 1)
-        self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=str(weight), fill="black")
+        self.canvas.delete("all")
+        edges = self.graph.get_edges()
 
-      for vertex, (x, y) in self.vertices_pos.items():
-        fill_color = "lightblue" if len(self.graph.graph[vertex]) <= 2 else "lightgreen"
-        self.canvas.create_oval(x-20, y-20, x+20, y+20, fill=fill_color, outline="black")
-        self.canvas.create_text(x, y, text=vertex)
-    
-      if self.start_vertex and self.end_vertex:
-        self.draw_shortest_way(self.start_vertex, self.end_vertex)
+        for vertex1, vertex2 in edges:
+            x1, y1 = self.vertices_pos[vertex1]
+            x2, y2 = self.vertices_pos[vertex2]
 
+            dx = x2 - x1
+            dy = y2 - y1
+            dist = math.sqrt(dx**2 + dy**2)
+            norm_dx = dx / dist
+            norm_dy = dy / dist
+            offset = 20
+
+            arrow_x = x2 - norm_dx * offset
+            arrow_y = y2 - norm_dy * offset
+
+            self.canvas.create_line(x1, y1, arrow_x, arrow_y, fill="black", width=2, arrow=tk.LAST)
+            weight = self.graph.weights.get((vertex1, vertex2), 1)
+            self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=str(weight), fill="black")
+
+        for vertex, (x, y) in self.vertices_pos.items():
+            fill_color = "lightblue" if len(self.graph.graph[vertex]) <= 2 else "lightgreen"
+            self.canvas.create_oval(x-20, y-20, x+20, y+20, fill=fill_color, outline="black")
+            self.canvas.create_text(x, y, text=vertex)
+
+        if self.start_vertex and self.end_vertex:
+            self.draw_shortest_way(self.start_vertex, self.end_vertex)
 
     def draw_shortest_way(self, start_vertex, end_vertex):
         path = self.graph.dijkstra(start_vertex, end_vertex)
-        
+
         if path[0] == start_vertex:
             for i in range(len(path) - 1):
                 x1, y1 = self.vertices_pos[path[i]]
                 x2, y2 = self.vertices_pos[path[i+1]]
-                
+
                 self.canvas.create_line(x1, y1, x2, y2, fill="red", width=2)
 
-    def on_click(self, event):
-     clicked_vertex = self.get_clicked_vertex(event.x, event.y)
-     if clicked_vertex:
-        # Caso o nó clicado seja o start_vertex ou end_vertex, resetar ambos
-        if clicked_vertex == self.start_vertex or clicked_vertex == self.end_vertex:
-            self.start_vertex = None
-            self.end_vertex = None
-        else:
-            # Se o start_vertex e o end_vertex ainda não foram definidos
-            if not self.start_vertex:
-                self.start_vertex = clicked_vertex
-            elif not self.end_vertex:
-                self.end_vertex = clicked_vertex
-            else:
-                # Caso ambos já estejam definidos, resetar e definir o novo start_vertex
-                self.start_vertex = clicked_vertex
-                self.end_vertex = None
-
-        # Se o start_vertex ou o end_vertex forem apagados, recalcula o caminho
-        if self.start_vertex and self.end_vertex:
-            self.draw_graph()
-        else:
-            # Anima a remoção e remove o nó clicado
-            self.animate_removal(clicked_vertex)
-            self.graph.remove_vertex(clicked_vertex)
+    def add_vertex(self):
+        vertex = self.vertex_entry.get().strip()
+        if vertex:
+            self.graph.add_vertex(vertex)
+            self.vertex_entry.delete(0, tk.END)
             self.vertices_pos = self.calculate_positions()
             self.draw_graph()
 
+    def add_edge(self):
+        vertex1 = self.vertex1_entry.get().strip()
+        vertex2 = self.vertex2_entry.get().strip()
+        weight = self.weight_entry.get().strip()
+        if vertex1 and vertex2:
+            self.graph.add_edge(vertex1, vertex2, int(weight) if weight else 1)
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+            self.weight_entry.delete(0, tk.END)
+            self.draw_graph()
 
-    def get_clicked_vertex(self, x, y):
-        for vertex, (vx, vy) in self.vertices_pos.items():
-            if (vx - 20) < x < (vx + 20) and (vy - 20) < y < (vy + 20):
-                return vertex
-        return None
+    def remove_vertex(self):
+        vertex = self.remove_vertex_entry.get().strip()
+        if vertex:
+            self.graph.remove_vertex(vertex)
+            self.remove_vertex_entry.delete(0, tk.END)
+            self.vertices_pos = self.calculate_positions()
+            self.draw_graph()
 
-    def animate_removal(self, vertex):
-        for i in range(5):
-            self.canvas.delete("all")
-            edges = self.graph.get_edges()
-            for vertex1, vertex2 in edges:
-                x1, y1 = self.vertices_pos[vertex1]
-                x2, y2 = self.vertices_pos[vertex2]
-                self.canvas.create_line(x1, y1, x2, y2, fill="gray", width=2)
+    def remove_edge(self):
+        vertex1 = self.vertex1_entry.get().strip()
+        vertex2 = self.vertex2_entry.get().strip()
+        if vertex1 and vertex2:
+            self.graph.remove_edge(vertex1, vertex2)
+            self.vertex1_entry.delete(0, tk.END)
+            self.vertex2_entry.delete(0, tk.END)
+            self.draw_graph()
 
-            for v, (x, y) in self.vertices_pos.items():
-                size = 20 - i*4 if v == vertex else 20
-                self.canvas.create_oval(x-size, y-size, x+size, y+size, fill="lightblue", outline="black")
-                self.canvas.create_text(x, y, text=v)
-            self.update()
-            time.sleep(0.1)  
+    def find_shortest_path(self):
+        start_vertex = self.start_entry.get().strip()
+        end_vertex = self.end_entry.get().strip()
+        if start_vertex and end_vertex:
+            self.start_vertex = start_vertex
+            self.end_vertex = end_vertex
+            self.draw_graph()
 
-# Exemplo de uso
-g = Graph()
-g.add_vertex('A')
-g.add_vertex('B')
-g.add_vertex('C')
-g.add_vertex('D')
-g.add_vertex('E')
-g.add_vertex('F')
-
-
-g.add_edge('A', 'B', 2)
-g.add_edge('B', 'A', 2) 
-g.add_edge('C', 'B', 1)
-g.add_edge('A', 'C', 3)
-g.add_edge('D', 'A', 1)
-g.add_edge('A', 'D', 1)
-g.add_edge('E', 'C', 12)
-g.add_edge('E', 'B', 30)
-g.add_edge('C', 'D', 0)
-g.add_edge('D','F', 0)
-
-app = GraphGUI(g)
-app.start_vertex = 'E' 
-app.end_vertex = 'F'   
-app.draw_graph()        
-app.mainloop()
+if __name__ == "__main__":
+    graph = Graph()
+    app = GraphGUI(graph)
+    app.mainloop()

@@ -41,16 +41,15 @@ class StaticQueue:
         if self.is_empty():
             return []
         
-        queue_list = []
-        for i in range(len(self.itens)):
-            queue_list.append(self.itens[i])
-        return queue_list
-
+        return self.itens.copy()  # Retorna uma cópia da fila
+    
     def sort_queue(self):
-        # Ordena a fila priorizando strings
-        self.itens.sort(key=lambda x: (isinstance(x, str), x))
-        print("A fila foi ordenada.")
-
+        if self.is_empty():
+            return
+        
+        # Ordena priorizando strings e depois números
+        self.itens.sort(key=lambda x: (isinstance(x, str), str(x) if isinstance(x, str) else int(x)))
+        
 # Interface com Tkinter
 class StaticQueueGUI:
     def __init__(self, root, max_size):
@@ -152,4 +151,3 @@ class StaticQueueGUI:
 root = tk.Tk()
 app = StaticQueueGUI(root, 5)
 root.mainloop()
-

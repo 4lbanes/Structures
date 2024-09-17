@@ -83,10 +83,10 @@ class DynamicStackGUI:
         self.button_push.grid(row=2, column=0, columnspan=2)
         
         self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop)
-        self.button_pop.grid(row=3, column=0, columnspan=2)
-        
         self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack)
-        self.button_sort.grid(row=4, column=0, columnspan=2)
+
+        self.button_pop.grid(row=3, column=0, columnspan=2)  
+        self.button_sort.grid(row=4, column=0, columnspan=2)  
         
         self.stack_display = tk.Text(root, height=10, width=30)
         self.stack_display.grid(row=5, column=0, columnspan=2)
@@ -121,6 +121,8 @@ class DynamicStackGUI:
         stack_list = self.stack.print_stack()
         if not stack_list:
             self.stack_display.insert(tk.END, "A pilha está vazia.")
+            self.button_pop.grid_forget()  # Oculta o botão de remoção
+            self.button_sort.grid_forget()  # Oculta o botão de ordenação
         else:
             for index, data in enumerate(stack_list):
                 if index == 0:
@@ -129,6 +131,8 @@ class DynamicStackGUI:
                     self.stack_display.insert(tk.END, f"Base -> {data}\n")
                 else:
                     self.stack_display.insert(tk.END, f"        {data}\n")
+            self.button_pop.grid(row=3, column=0, columnspan=2)  # Mostra o botão de remoção
+            self.button_sort.grid(row=4, column=0, columnspan=2)  # Mostra o botão de ordenação
 
 # Criação da pilha e da interface
 ds = DynamicStack(5)
