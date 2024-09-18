@@ -47,25 +47,28 @@ class DynamicQueue:
         return self.front.data
     
     def sort_queue(self):
-        if self.is_empty():
-            return
-        
-        # Armazena os nós em uma lista
-        nodes = []
-        current = self.front
-        while current:
+     if self.is_empty():
+        return
+    
+     nodes = []
+     current = self.front
+     while current:
+        # Tenta converter os dados em número, senão trata como string
+        try:
+            nodes.append(int(current.data))
+        except ValueError:
             nodes.append(current.data)
-            current = current.next
-        
-        # Ordena priorizando strings e depois números
-        nodes.sort(key=lambda x: (isinstance(x, str), str(x) if isinstance(x, str) else int(x)))
-        
-        # Reconstrói a fila ordenada
-        self.front = None
-        self.rear = None
-        self.size = 0
-        for data in nodes:
-            self.enqueue(data)
+        current = current.next
+    
+    # Ordena primeiro números, depois strings
+     nodes.sort(key=lambda x: (isinstance(x, str), x))
+    
+    # Reconstrói a fila ordenada
+     self.front = None
+     self.rear = None
+     self.size = 0
+     for data in nodes:
+       self.enqueue(data)
     
     def print_queue(self):
         if self.is_empty():

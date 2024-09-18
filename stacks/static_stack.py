@@ -46,16 +46,22 @@ class StaticStack:
     def get_stack(self):
         return self.items[::-1]  # Retorna uma cópia invertida da pilha para mostrar o topo primeiro
     
-    # Função de ordenação da pilha
-    def sort_stack(self):
-        def custom_sort(item):
-            if isinstance(item, str):
-                return (0, item)  # Prioriza strings
-            return (1, item)  # Números são secundários
+    def sort_stack(self):  # Renomeando para sort_stack
+        if self.is_empty():
+            return
+        
+        # Tenta converter os dados para inteiros, se não conseguir, mantém como string
+        def convert(item):
+            try:
+                return int(item)
+            except ValueError:
+                return item
+        
+        # Ordena priorizando números antes de strings
+        self.items.sort(key=lambda x: (isinstance(convert(x), str), convert(x)))
 
-        self.items.sort(key=custom_sort)  # Ordena a pilha
-        print("A pilha foi ordenada.")
-
+    
+    
 class StaticStackGUI:    
     def __init__(self, root, max_size):
         self.stack = StaticStack(max_size)  
