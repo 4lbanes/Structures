@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import time
 
 class Node:
     def __init__(self, data, priority):
@@ -18,38 +19,34 @@ class PriorityQueue:
     def enqueue(self, data, priority):
         new_node = Node(data, priority)
         
-        if self.is_empty() or str(self.front.priority) > str(priority):
+        if self.is_empty() or self.front.priority > priority:  # Inserção no início
             new_node.next = self.front
             self.front = new_node
         else:
             current = self.front
-            while current.next and str(current.next.priority) <= str(priority):
+            while current.next and current.next.priority <= priority:  # Inserção ordenada pela prioridade
                 current = current.next
             
             new_node.next = current.next
             current.next = new_node
         
         self.size += 1
-    
+        print(f"Elemento '{data}' com prioridade {priority} foi adicionado à fila.")
+
     def dequeue(self):
         if self.is_empty():
             return None
         
         removed_value = self.front.data
-        self.front = self.front.next
-        self.size -= 1
+        self.front = self.front.next  # Remove o elemento do topo
+        if self.front is None:  # Se a fila ficou vazia
+            self.size = 0
+        else:
+            self.size -= 1
+        
+        print(f"Elemento '{removed_value}' foi removido da fila.")
         return removed_value
     
-    def peek(self):
-        if self.is_empty():
-            return None
-        return self.front.data
-    
-    def max_priority(self):
-        if self.is_empty():
-            return None
-        return self.front.priority
-        
     def print_queue(self):
         if self.is_empty():
             return []
@@ -67,29 +64,32 @@ class PriorityQueueGUI:
         self.queue = PriorityQueue()
         self.root = root
         self.root.title("Fila de Prioridade: ")
+
+        # Aumentar a área visível
+        self.canvas = tk.Canvas(root, bg="white", height=600, width=1200)  # Aumenta a largura e altura do canvas
+        self.canvas.grid(row=0, column=0, columnspan=3)
         
+        # Entradas e rótulos para o dado e a prioridade
         self.label_data = tk.Label(root, text="Elemento:")
-        self.label_data.grid(row=0, column=0)
+        self.label_data.grid(row=2, column=0)
         self.entry_data = tk.Entry(root)
-        self.entry_data.grid(row=0, column=1)
+        self.entry_data.grid(row=2, column=1)
         
         self.label_priority = tk.Label(root, text="Prioridade:")
-        self.label_priority.grid(row=1, column=0)
+        self.label_priority.grid(row=3, column=0)
         self.entry_priority = tk.Entry(root)
-        self.entry_priority.grid(row=1, column=1)
+        self.entry_priority.grid(row=3, column=1)
         
+        # Botões de interação
         self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue)
-        self.button_enqueue.grid(row=2, column=0, columnspan=2)
+        self.button_enqueue.grid(row=4, column=0, columnspan=2)
         
         self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)
-        self.button_dequeue.grid(row=3, column=0, columnspan=2)
-        
-        self.queue_display = tk.Text(root, height=10, width=30)
-        self.queue_display.grid(row=4, column=0, columnspan=3)
-        
+        self.button_dequeue.grid(row=5, column=0, columnspan=2)
+
+        self.queue_items = []  # Armazena os retângulos e textos na tela
         self.update_queue_display()
-        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões ao iniciar
-    
+
     def enqueue(self):
         data = self.entry_data.get()
         priority = self.entry_priority.get()
@@ -98,49 +98,73 @@ class PriorityQueueGUI:
             messagebox.showerror("Erro", "Preencha todos os campos!")
             return
         
+        # Tenta converter a prioridade para um número inteiro
+        try:
+            priority = int(priority)
+        except ValueError:
+            messagebox.showerror("Erro", "A prioridade deve ser um número inteiro.")
+            return
+        
         self.queue.enqueue(data, priority)
-        self.update_queue_display()
-        self.entry_data.delete(0, tk.END)  
+        self.entry_data.delete(0, tk.END)  # Limpa o campo de dados
         self.entry_priority.delete(0, tk.END)  # Limpa o campo de prioridade
         
-        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após inserção
-    
+        self.update_queue_display(animated=True)
+
     def dequeue(self):
         removed = self.queue.dequeue()
         if removed:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         else:
             messagebox.showwarning("Aviso", "A fila está vazia.")
-        self.update_queue_display()
         
-        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após remoção
+        self.update_queue_display(animated=False)
 
-    def sort_queue(self):
-        if not self.queue.is_empty():
-            self.queue.sort_queue()  
-            self.update_queue_display()
-            messagebox.showinfo("Ordenação", "A fila foi ordenada.")
-    
-    def update_queue_display(self):
-        self.queue_display.delete(1.0, tk.END)
+    def update_queue_display(self, animated=False):
+        # Limpa os retângulos antigos
+        self.canvas.delete("all")
+        self.queue_items = []
+
+        # Calcula posição inicial para o topo
+        x_start = 50
+        y_center = self.canvas.winfo_height() // 2
+
         queue_list = self.queue.print_queue()
-        if not queue_list:
-            self.queue_display.insert(tk.END, "Fila de prioridade está vazia.")
-        else:
-            for index, (data, priority) in enumerate(queue_list):
-                if index == 0:
-                    self.queue_display.insert(tk.END, f"Topo -> {data}, Prioridade: {priority}\n")
-                elif index == len(queue_list) - 1:
-                    self.queue_display.insert(tk.END, f"Base -> {data}, Prioridade: {priority}\n")
-                else:
-                    self.queue_display.insert(tk.END, f"        {data}, Prioridade: {priority}\n")
-                    
-    def update_buttons_visibility(self):
-        """Atualiza a visibilidade dos botões com base no estado da fila."""
-        if self.queue.is_empty():
-            self.button_dequeue.grid_remove()  # Esconde o botão de remoção se a fila estiver vazia
-        else:
-            self.button_dequeue.grid()  # Mostra o botão de remoção se a fila não estiver vazia
+
+        # Desenha cada elemento da fila
+        for index, (data, priority) in enumerate(queue_list):
+            item_str = f"E: {data}, P: {priority}"  # Formatação atualizada
+            item_width = 150  # Define uma largura fixa
+            x_position = x_start + index * (item_width + 50)  # Espaço fixo entre os elementos
+
+            square = self.canvas.create_rectangle(
+                x_position, y_center - 20, 
+                x_position + item_width, y_center + 20,
+                fill="lightblue"
+            )
+
+            if index == 0:
+                text_str = f"Topo\n{item_str}"
+            elif index == len(queue_list) - 1:
+                text_str = f"Base\n{item_str}"
+            else:
+                text_str = item_str
+
+            # Diminuir o tamanho da fonte
+            text = self.canvas.create_text(
+                x_position + item_width // 2, y_center,
+                text=text_str, font=("Arial", 10)  # Reduzindo o tamanho da fonte
+            )
+
+            self.queue_items.append((square, text))
+
+            # Se for para animar, move o quadrado da direita para a esquerda
+            if animated:
+                for step in range(10):
+                    self.canvas.move(square, -2, 0)
+                    self.canvas.move(text, -2, 0)
+                    self.canvas.update()
+                    time.sleep(0.02)
 
 # Execução da interface gráfica
 root = tk.Tk()

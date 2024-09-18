@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox
+import time
 
 class DynamicStack:
     def __init__(self, initial_size):
@@ -7,7 +8,6 @@ class DynamicStack:
         self.size_max = initial_size  
 
     def push(self, item): 
-        # Tenta converter para float, mas se não for possível, mantém o item como está
         try:
             item = float(item)  # Converte o item para float se for um número
         except ValueError:
@@ -37,65 +37,44 @@ class DynamicStack:
         self.size_max *= 2  
         print(f"A stack foi redimensionada. Novo tamanho máximo: {self.size_max}")
 
-    def peek(self):
-        if not self.is_empty():
-            return self.itens[-1]
-        else:
-            return None
-
     def size(self):
         return len(self.itens)
-    
-    def print_stack(self):
-        if self.is_empty():
-            print("A stack está vazia.")
-            return []
-        
-        stack_list = []
-        for i in range(len(self.itens)-1, -1, -1):
-            stack_list.append(self.itens[i])
-        return stack_list
 
-    # Função de ordenação da pilha
     def sort_stack(self):
-        def custom_sort(item):
-            # Prioriza strings e numera como float
-            if isinstance(item, str):
-                return (0, item)  # Strings têm prioridade
-            return (1, item)  # Números são secundários
+        """Ordena a pilha mantendo a ordem de uma pilha"""
+        self.itens.sort(reverse=True)  # Ordena de forma que o maior fique no topo
+        print(f"Stack ordenada: {self.itens}")
 
-        self.itens.sort(key=custom_sort) 
-        print("A stack foi ordenada.")
-
-# Interface com Tkinter
 class DynamicStackGUI:
     def __init__(self, root, stack):
-        self.stack = stack  
+        self.stack = stack
         self.root = root
-        self.root.title("Pilha Dinâmica: ")
-        
-        self.label_data = tk.Label(root, text="Elemento:")
-        self.label_data.grid(row=1, column=0)
-        self.entry_data = tk.Entry(root)
-        self.entry_data.grid(row=1, column=1)
-        
-        self.button_push = tk.Button(root, text="Adicionar na Pilha", command=self.push)
-        self.button_push.grid(row=2, column=0, columnspan=2)
-        
-        self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop)
-        self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack)
+        self.root.title("Pilha Dinâmica")
 
-        self.button_pop.grid(row=3, column=0, columnspan=2)  
-        self.button_sort.grid(row=4, column=0, columnspan=2)  
-        
-        self.stack_display = tk.Text(root, height=10, width=30)
-        self.stack_display.grid(row=5, column=0, columnspan=2)
-        
-        self.update_stack_display()
-    
+        self.root.geometry("800x600")  # Definir um tamanho maior para a janela
+
+        self.canvas = tk.Canvas(root, bg="white")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.label_data = tk.Label(root, text="Elemento:")
+        self.label_data.pack(side=tk.LEFT, padx=10, pady=10)
+        self.entry_data = tk.Entry(root)
+        self.entry_data.pack(side=tk.LEFT, padx=10, pady=10)
+
+        self.button_push = tk.Button(root, text="Adicionar na Pilha", command=self.push)
+        self.button_push.pack(side=tk.LEFT, padx=10, pady=10)
+
+        self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop)
+        self.button_pop.pack(side=tk.LEFT, padx=10, pady=10)
+
+        self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack)
+        self.button_sort.pack(side=tk.LEFT, padx=10, pady=10)
+
+        self.stack_items = []
+        self.update_buttons_visibility()
+
     def push(self):
         data = self.entry_data.get()
-        
         if not data:
             messagebox.showerror("Erro", "Preencha o campo de elemento!")
             return
@@ -103,36 +82,72 @@ class DynamicStackGUI:
         self.stack.push(data)
         self.update_stack_display()
         self.entry_data.delete(0, tk.END)
+        self.update_buttons_visibility()
 
     def pop(self):
         removed = self.stack.pop()
         if removed is not None:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
+            self.update_stack_display()
         else:
             messagebox.showwarning("Aviso", "A pilha está vazia.")
-        self.update_stack_display()
-
+        self.update_buttons_visibility()
+    
     def sort_stack(self):
         self.stack.sort_stack()
         self.update_stack_display()
-    
+        self.update_buttons_visibility()
+
     def update_stack_display(self):
-        self.stack_display.delete(1.0, tk.END)
-        stack_list = self.stack.print_stack()
-        if not stack_list:
-            self.stack_display.insert(tk.END, "A pilha está vazia.")
-            self.button_pop.grid_forget()  # Oculta o botão de remoção
-            self.button_sort.grid_forget()  # Oculta o botão de ordenação
+        # Limpa os quadrados antigos
+        self.canvas.delete("all")
+        self.stack_items = []
+
+        # Define a posição inicial do topo, calculando dinamicamente para centralizar na tela
+        canvas_width = self.canvas.winfo_width()
+        x_center = canvas_width // 2
+        y_top = 50
+
+        for index, item in enumerate(reversed(self.stack.itens)):
+            y_position = y_top + index * 50  # Ajusta a posição para cada elemento
+
+            item_str = str(item)
+            item_width = max(100, len(item_str) * 15)  # Largura mínima de 100, ajusta ao tamanho do texto
+
+            # Desenha o quadrado
+            square = self.canvas.create_rectangle(
+                x_center - item_width // 2, y_position,
+                x_center + item_width // 2, y_position + 40,
+                fill="lightblue"
+            )
+            
+            # Verifica se é o topo ou a base para personalizar o texto
+            if index == 0:  # Se for o topo da pilha
+                text_str = f"Topo\n{item_str}"
+            elif index == len(self.stack.itens) - 1:  # Se for a base da pilha
+                text_str = f"Base\n{item_str}"
+            else:
+                text_str = item_str  # Apenas o valor para os demais itens
+
+            # Adiciona o texto dentro do quadrado
+            text = self.canvas.create_text(x_center, y_position + 20, text=text_str, font=("Arial", 16))
+
+            self.stack_items.append((square, text))
+
+            # Animação de movimento para cada quadrado
+            for step in range(10): 
+                self.canvas.move(square, 0, 3)
+                self.canvas.move(text, 0, 3)
+                self.canvas.update()
+                time.sleep(0.02)
+
+    def update_buttons_visibility(self):
+        if self.stack.is_empty():
+            self.button_pop.pack_forget()
+            self.button_sort.pack_forget()
         else:
-            for index, data in enumerate(stack_list):
-                if index == 0:
-                    self.stack_display.insert(tk.END, f"Topo -> {data}\n")
-                elif index == len(stack_list) - 1:
-                    self.stack_display.insert(tk.END, f"Base -> {data}\n")
-                else:
-                    self.stack_display.insert(tk.END, f"        {data}\n")
-            self.button_pop.grid(row=3, column=0, columnspan=2)  # Mostra o botão de remoção
-            self.button_sort.grid(row=4, column=0, columnspan=2)  # Mostra o botão de ordenação
+            self.button_pop.pack(side=tk.LEFT, padx=10, pady=10)
+            self.button_sort.pack(side=tk.LEFT, padx=10, pady=10)
 
 # Criação da pilha e da interface
 ds = DynamicStack(5)

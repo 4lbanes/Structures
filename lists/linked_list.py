@@ -122,7 +122,6 @@ class LinkedList:
             return removed_value
 
     def to_list(self):
-        """Converte a lista encadeada em uma lista Python."""
         result = []
         current = self.head
         while current:
@@ -131,7 +130,6 @@ class LinkedList:
         return result
 
     def from_list(self, lst):
-        """Cria uma lista encadeada a partir de uma lista Python."""
         self.head = None
         self.tail = None
         self.size = 0
@@ -142,29 +140,22 @@ class LinkedList:
         if self.is_empty() or self.size == 1:
             return
 
-        # Converte a lista encadeada para uma lista Python
         lst = self.to_list()
 
         def convert_if_possible(item):
-            # Tenta converter para float, se falhar, mantém como string
             try:
                 return float(item)
             except ValueError:
                 return item
 
-        # Converte os dados para números quando possível, mantendo strings intactas
         lst_converted = [(convert_if_possible(item), item) for item in lst]
 
-        # Função personalizada para a ordenação
         def custom_key(item):
             converted_value, original_value = item
-            # Prioriza strings sobre números
             return (isinstance(converted_value, float), converted_value)
 
-        # Ordena a lista Python com base no valor convertido
         lst_converted.sort(key=custom_key)
 
-        # Recria a lista encadeada a partir da lista Python ordenada
         sorted_lst = [item[1] for item in lst_converted]
         self.from_list(sorted_lst)
 
@@ -207,19 +198,12 @@ class LinkedListGUI:
         self.button_remove_last = tk.Button(root, text="Remover Último", command=self.remove_last)
         self.button_remove_last.grid(row=3, column=1, columnspan=2)
         
-        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list)  # Atualização aqui
+        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list) 
         self.button_sort.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
         
-        self.label_index = tk.Label(root, text="Índice para Remover:")
-        self.label_index.grid(row=5, column=0)
-        self.entry_index = tk.Entry(root)
-        self.entry_index.grid(row=5, column=1)
-        self.button_remove_index = tk.Button(root, text="Remover por Índice", command=self.remove_by_index)
-        self.button_remove_index.grid(row=6, column=0, columnspan=2)
-        
-        self.list_display = tk.Text(root, height=10, width=50)
-        self.list_display.grid(row=7, column=0, columnspan=2)
-        
+        self.canvas = tk.Canvas(root, bg="white", height=200, width=600)
+        self.canvas.grid(row=7, column=0, columnspan=2)
+
         self.update_list_display()
     
     def insert(self):
@@ -256,39 +240,50 @@ class LinkedListGUI:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         self.update_list_display()
     
-    def remove_by_index(self):
-        index = self.entry_index.get()
-        if not index.isdigit():
-            messagebox.showerror("Erro", "Índice deve ser um número!")
-            return
-        
-        index = int(index)
-        removed = self.linked_list.remove_by_index(index)
-        if removed:
-            messagebox.showinfo("Removido", f"Elemento removido: {removed}")
-        self.update_list_display()
-    
-    def sort_list(self):  # Novo método para ordenar a lista
+    def sort_list(self):
         self.linked_list.sort()
         messagebox.showinfo("Ordenação", "Lista ordenada com sucesso!")
         self.update_list_display()
 
-    def update_buttons_visibility(self):
-        if self.linked_list.is_empty():
-            self.button_remove_first.grid_forget()
-            self.button_remove_last.grid_forget()
-            self.button_remove_index.grid_forget()
-        else:
-            self.button_remove_first.grid(row=3, column=0, columnspan=2)
-            self.button_remove_last.grid(row=3, column=1, columnspan=2)
-            self.button_remove_index.grid(row=6, column=0, columnspan=2)
-
     def update_list_display(self):
-        self.list_display.delete(1.0, tk.END)
-        self.list_display.insert(tk.END, str(self.linked_list))
-        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões
+        self.draw_linked_list()
 
-# Criação da interface
-root = tk.Tk()
-app = LinkedListGUI(root, 5)
-root.mainloop()
+    def draw_linked_list(self):
+        """Desenha os nós da lista como quadrados no canvas"""
+        self.canvas.delete("all")
+        current = self.linked_list.head
+        x_start = 20
+        y_start = 50
+        node_width = 60
+        node_height = 40
+        arrow_offset = 40
+
+        if current:
+            # Coloca o "head" no primeiro nó
+            self.canvas.create_text(x_start, y_start - 20, text="head", fill="black")
+
+        while current:
+            # Desenha o retângulo
+            self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
+            self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(current.data))
+
+            if current.next:
+                self.canvas.create_line(x_start + node_width, y_start + node_height / 2, 
+                                        x_start + node_width + arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+            
+            x_start += node_width + arrow_offset
+            current = current.next
+
+        if self.linked_list.tail:
+            self.canvas.create_text(x_start - node_width - arrow_offset, y_start - 20, text="tail", fill="black")
+
+        # Adiciona "null" no final com uma seta
+        if self.linked_list.tail:
+            self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, 
+                                    x_start, y_start + node_height / 2, arrow=tk.LAST)
+            self.canvas.create_text(x_start + 20, y_start + node_height / 2, text="null", fill="black")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    gui = LinkedListGUI(root, 10)
+    root.mainloop()
