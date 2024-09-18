@@ -129,42 +129,40 @@ class AVLTree:
     
     def delete(self, key, gui=None):
         self.root = self._delete(self.root, key, gui)
-
+        
     def _delete(self, node, key, gui):
-        if node is None:
-            return node
+     if node is None:
+        return node
 
-        if gui:
-            # Destaca o nó atual e exibe comparação
-            self._schedule_comparison(node, key, gui, time.sleep(0.5))
-            gui.highlight_node(node.value, "yellow")
-            gui.update()
-            time.sleep(1)
+     if gui:
+        gui.highlight_node(node.value, "yellow")
+        gui.update()
+        time.sleep(1)
 
-        if key < node.value:
-            node.left = self._delete(node.left, key, gui)
-        elif key > node.value:
-            node.right = self._delete(node.right, key, gui)
-        else:
-            if node.left is None:
-                return node.right
-            elif node.right is None:
-                return node.left
+     if key < node.value:
+        node.left = self._delete(node.left, key, gui)
+     elif key > node.value:
+        node.right = self._delete(node.right, key, gui)
+     else:
+        if node.left is None:
+            return node.right
+        elif node.right is None:
+            return node.left
 
-            temp = self.get_min_value_node(node.right)
-            node.value = temp.value
-            node.right = self._delete(node.right, temp.value, gui)
+        temp = self.get_min_value_node(node.right)
+        node.value = temp.value
+        node.right = self._delete(node.right, temp.value, gui)
 
-        self.update_height(node)
-        balanced_node = self.balance(node)
+     self.update_height(node)
+     balanced_node = self.balance(node)
 
-        if gui and balanced_node != node:
-            gui.highlight_node(node.value, "red")
-            gui.update()
-            time.sleep(1)
+     if gui and balanced_node != node:
+        gui.highlight_node(node.value, "red")
+        gui.update()
+        time.sleep(1)
 
-        return balanced_node
-
+     return balanced_node
+ 
     def invert(self):
         self._invert(self.root)
 
@@ -261,25 +259,32 @@ class AVLGUI(tk.Tk):
             if (vx - self.node_radius) < x < (vx + self.node_radius) and (vy - self.node_radius) < y < (vy + self.node_radius):
                 return value
         return None
-
-    def insert_node(self):
-        value = self.insert_entry.get()
-        if value.isdigit():
-            self.avl_tree.insert(int(value), gui=self)
-            self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-            self.insert_entry.delete(0, tk.END)
-            
+    
     def invert_tree(self):
         self.avl_tree.invert()
         self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-
+        
+    def insert_node(self):
+     value = self.insert_entry.get()
+     if value.isdigit():
+        self.avl_tree.insert(int(value), gui=self)
+        self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+        self.insert_entry.delete(0, tk.END)
+        self.update_button_visibility()  # Atualiza os botões após a inserção
+        
     def remove_node(self):
-        value = self.remove_entry.get()
-        if value.isdigit():
-            self.avl_tree.delete(int(value))
-            self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-            self.remove_entry.delete(0, tk.END)
+     value = self.remove_entry.get()
+     if value.isdigit():
+        self.avl_tree.delete(int(value), gui=self)
+        self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+        self.remove_entry.delete(0, tk.END)
+        self.update_button_visibility()  # Atualiza os botões após a remoção
 
+    def invert_tree(self):
+     self.avl_tree.invert()
+     self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+     self.update_button_visibility()  # Atualiza os botões após a inversão
+     
     def show_inorder(self):
         self.show_traversal(self.avl_tree.inorder(), 'red')
 
@@ -318,6 +323,20 @@ class AVLGUI(tk.Tk):
     def show_comparison(self, node_value, inserted_value, comparison):
         self.output_text.delete(1.0, tk.END)
         self.output_text.insert(tk.END, f"{node_value} {comparison} {inserted_value}\n")
+    
+    def update_button_visibility(self):
+        if self.avl_tree.is_empty():
+            self.remove_button.config(state=tk.DISABLED)
+            self.invert_button.config(state=tk.DISABLED)
+            self.inorder_button.config(state=tk.DISABLED)
+            self.preorder_button.config(state=tk.DISABLED)
+            self.postorder_button.config(state=tk.DISABLED)
+        else:
+            self.remove_button.config(state=tk.NORMAL)
+            self.invert_button.config(state=tk.NORMAL)
+            self.inorder_button.config(state=tk.NORMAL)
+            self.preorder_button.config(state=tk.NORMAL)
+            self.postorder_button.config(state=tk.NORMAL)
 
 
 if __name__ == "__main__":

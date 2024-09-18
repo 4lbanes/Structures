@@ -79,28 +79,28 @@ class MinHeapGUI(tk.Tk):
         self.canvas.pack(side=tk.RIGHT, padx=20, pady=20)
 
         # Configuração dos parâmetros de desenho
-        self.node_radius = 20
-        self.horizontal_spacing = 80
-        self.vertical_spacing = 50
+        self.node_radius = 13
+        self.horizontal_spacing = 120
+        self.vertical_spacing = 60
 
     def insert_value(self):
         value = self.entry.get()
         if value.isdigit():
             self.heap.insert(int(value))
             self.entry.delete(0, tk.END)
-            self.update_heap_label()  # Atualiza o label com o conteúdo do heap
-            self.draw_heap()
+            self.update_heap_label()
+            self.animate_insert()
 
     def extract_min(self):
-        self.heap.extract_min()
-        self.update_heap_label()  # Atualiza o label com o conteúdo do heap
-        self.draw_heap()
+        if len(self.heap.heap) > 0:
+            self.heap.extract_min()
+            self.update_heap_label()
+            self.animate_extract()
 
     def draw_heap(self):
         self.canvas.delete("all")
         if len(self.heap.heap) > 0:
-            levels = math.floor(math.log2(len(self.heap.heap) + 1))
-            self._draw_nodes(0, 300, 50, levels)  # Ajustei a posição inicial para centralizar
+            self._draw_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)))
 
     def _draw_nodes(self, index, x, y, levels):
         if index < len(self.heap.heap):
@@ -113,58 +113,107 @@ class MinHeapGUI(tk.Tk):
             right_child_index = 2 * index + 2
 
             if left_child_index < len(self.heap.heap):
-                x_left = x - self.horizontal_spacing * (levels - 1)
+                x_left = x - self.horizontal_spacing / (2 ** (levels - 1))
                 y_left = y + self.vertical_spacing
                 self.canvas.create_line(x, y + self.node_radius, x_left, y_left - self.node_radius)
                 self._draw_nodes(left_child_index, x_left, y_left, levels - 1)
 
             if right_child_index < len(self.heap.heap):
-                x_right = x + self.horizontal_spacing * (levels - 1)
+                x_right = x + self.horizontal_spacing / (2 ** (levels - 1))
                 y_right = y + self.vertical_spacing
                 self.canvas.create_line(x, y + self.node_radius, x_right, y_right - self.node_radius)
                 self._draw_nodes(right_child_index, x_right, y_right, levels - 1)
 
-    def print_heap(self):
-        """Desenha o caminho da raiz para os nós da esquerda para a direita em todos os níveis."""
-        self.canvas.delete("all")  # Limpa o canvas antes de desenhar o caminho
-        if len(self.heap.heap) > 0:
-            self._draw_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)))
-            self.draw_traversal_line()
+    def animate_insert(self):
+        self.canvas.delete("all")
+        self._animate_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)), self.draw_heap)
 
-    def draw_traversal_line(self):
-        """Desenha a linha da raiz até os níveis inferiores da esquerda para a direita."""
-        path_coords = []
-        if len(self.heap.heap) > 0:
-            self._collect_path_coords(0, 300, 50, path_coords)  # Coleta as coordenadas de cada nó
+    def animate_extract(self):
+        self.canvas.delete("all")
+        self._animate_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)), self.draw_heap)
 
-            for i in range(len(path_coords) - 1):
-                x1, y1 = path_coords[i]
-                x2, y2 = path_coords[i + 1]
-                self.canvas.create_line(x1, y1, x2, y2, fill="red", width=2)  # Desenha a linha vermelha
-
-    def _collect_path_coords(self, index, x, y, path_coords):
-        """Coleta as coordenadas (x, y) de cada nó no heap para desenhar a linha."""
+    def _animate_nodes(self, index, x, y, levels, callback):
         if index < len(self.heap.heap):
-            path_coords.append((x, y))  # Guarda as coordenadas do nó atual
+            # Animação para desenhar o nó
+            self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                    x + self.node_radius, y + self.node_radius, fill="lightblue")
+            self.canvas.create_text(x, y, text=str(self.heap.heap[index]))
 
             left_child_index = 2 * index + 1
             right_child_index = 2 * index + 2
 
             if left_child_index < len(self.heap.heap):
-                x_left = x - self.horizontal_spacing
+                x_left = x - self.horizontal_spacing / (2 ** (levels - 1))
+                y_left = y + self.vertical_spacing
+                self.canvas.create_line(x, y + self.node_radius, x_left, y_left - self.node_radius)
+                self.after(200, self._animate_nodes, left_child_index, x_left, y_left, levels - 1, callback)
+
+            if right_child_index < len(self.heap.heap):
+                x_right = x + self.horizontal_spacing / (2 ** (levels - 1))
+                y_right = y + self.vertical_spacing
+                self.canvas.create_line(x, y + self.node_radius, x_right, y_right - self.node_radius)
+                self.after(200, self._animate_nodes, right_child_index, x_right, y_right, levels - 1, callback)
+
+            if index == 0:
+                self.after(500, callback)
+
+    def print_heap(self):
+        """Desenha o caminho da raiz até os nós da esquerda para a direita em todos os níveis com uma seta ao final."""
+        self.canvas.delete("all")
+        if len(self.heap.heap) > 0:
+            self._draw_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)))
+            self.draw_traversal_line()
+            
+    def draw_traversal_line(self):
+        """Desenha a linha da esquerda para a direita passando por todos os nós."""
+        self.canvas.delete("all")
+        self.draw_heap()  # Primeiro desenha a árvore
+
+        path_coords = []
+        if len(self.heap.heap) > 0:
+            # Coleta as coordenadas de todos os nós da esquerda para a direita
+            self._collect_path_coords(0, 300, 50, path_coords)
+
+            # Gradualmente desenha a linha, de um nó ao outro, da esquerda para a direita
+            for i in range(len(path_coords) - 1):
+                x1, y1 = path_coords[i]
+                x2, y2 = path_coords[i + 1]
+                self.canvas.create_line(x1, y1, x2, y2, fill="red", width=2)
+                self.update()  # Atualiza a tela para mostrar a linha gradualmente
+                self.after(500)  # Aguarda 500ms antes de desenhar a próxima parte da linha
+
+            # Desenha uma seta no final do caminho
+            if path_coords:
+                x_end, y_end = path_coords[-1]
+                self.canvas.create_line(x_end, y_end, x_end - 10, y_end - 10, fill="red", width=2)
+                self.canvas.create_line(x_end, y_end, x_end + 10, y_end - 10, fill="red", width=2)
+
+    def _collect_path_coords(self, index, x, y, path_coords):
+        """Coleta as coordenadas (x, y) de cada nó no heap em ordem da esquerda para a direita."""
+        if index < len(self.heap.heap):
+            path_coords.append((x, y))
+
+            left_child_index = 2 * index + 1
+            right_child_index = 2 * index + 2
+
+            # Primeiro coleta as coordenadas da subárvore da esquerda
+            if left_child_index < len(self.heap.heap):
+                x_left = x - self.horizontal_spacing / (2 ** (math.floor(math.log2(left_child_index + 1))))
                 y_left = y + self.vertical_spacing
                 self._collect_path_coords(left_child_index, x_left, y_left, path_coords)
 
+            # Depois coleta as coordenadas da subárvore da direita
             if right_child_index < len(self.heap.heap):
-                x_right = x + self.horizontal_spacing
+                x_right = x + self.horizontal_spacing / (2 ** (math.floor(math.log2(right_child_index + 1))))
                 y_right = y + self.vertical_spacing
                 self._collect_path_coords(right_child_index, x_right, y_right, path_coords)
 
+
+    
+
     def update_heap_label(self):
-        """Atualiza o label para mostrar o conteúdo atual do heap."""
         self.heap_label.config(text=f"Heap: {self.heap.heap}")
+        self.draw_heap()
 
-if __name__ == "__main__":
-    app = MinHeapGUI()
-    app.mainloop()
-
+app = MinHeapGUI()
+app.mainloop()

@@ -199,12 +199,13 @@ class LinkedListGUI:
         self.button_remove_last.grid(row=3, column=1, columnspan=2)
         
         self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list) 
-        self.button_sort.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+        self.button_sort.grid(row=4, column=2, padx=10, pady=5)
         
         self.canvas = tk.Canvas(root, bg="white", height=200, width=600)
         self.canvas.grid(row=7, column=0, columnspan=2)
 
         self.update_list_display()
+        self.update_buttons_visibility()
     
     def insert(self):
         data = self.entry_data.get()
@@ -216,6 +217,7 @@ class LinkedListGUI:
         self.linked_list.insert(data)
         self.update_list_display()
         self.entry_data.delete(0, tk.END)
+        self.update_buttons_visibility()
     
     def add(self):
         data = self.entry_data.get()
@@ -227,26 +229,51 @@ class LinkedListGUI:
         self.linked_list.add(data)
         self.update_list_display()
         self.entry_data.delete(0, tk.END)
+        self.update_buttons_visibility()
     
     def remove_first(self):
         removed = self.linked_list.remove_first()
         if removed:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         self.update_list_display()
+        self.update_buttons_visibility()
     
     def remove_last(self):
         removed = self.linked_list.remove_last()
         if removed:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         self.update_list_display()
+        self.update_buttons_visibility()
+    
+    def remove_by_index(self):
+        index = tk.simpledialog.askinteger("Remover por índice", "Informe o índice:")
+        if index is not None:
+            removed = self.linked_list.remove_by_index(index)
+            if removed:
+                messagebox.showinfo("Removido", f"Elemento removido: {removed}")
+            self.update_list_display()
+            self.update_buttons_visibility()
     
     def sort_list(self):
         self.linked_list.sort()
         messagebox.showinfo("Ordenação", "Lista ordenada com sucesso!")
         self.update_list_display()
+        self.update_buttons_visibility()
 
     def update_list_display(self):
         self.draw_linked_list()
+    
+    def update_buttons_visibility(self):
+        if self.linked_list.is_empty():
+            self.button_remove_first.grid_forget()
+            self.button_remove_last.grid_forget()
+            self.button_remove_by_index.grid_forget()
+            self.button_sort.grid_forget()
+        else:
+            self.button_remove_first.grid(row=3, column=0, padx=10, pady=5)
+            self.button_remove_last.grid(row=3, column=1, padx=10, pady=5)
+            self.button_remove_by_index.grid(row=4, column=0, padx=10, pady=5)
+            self.button_sort.grid(row=4, column=2, padx=10, pady=5)
 
     def draw_linked_list(self):
         """Desenha os nós da lista como quadrados no canvas"""

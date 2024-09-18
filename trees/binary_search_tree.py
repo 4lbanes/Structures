@@ -1,4 +1,5 @@
 import tkinter as tk
+import time
 
 # Classe que representa um nó da Árvore Binária de Busca
 class Node:
@@ -15,49 +16,94 @@ class BinarySearchTree:
     def is_empty(self):
         return self.root is None
 
-    def insert(self, key):
+    def insert(self, key, gui=None):
         if self.root is None:
             self.root = Node(key)
         else:
-            self._insert(self.root, key)
+            self.root = self._insert(self.root, key, gui)
 
-    def _insert(self, root, key):
-        if key < root.value:
-            if root.left is None:
-                root.left = Node(key)
+    def _insert(self, node, key, gui):
+        if node is None:
+            return Node(key)
+        
+        # Destacar o nó atual e mostrar comparação, se a GUI estiver ativada
+        if gui:
+            gui.highlight_node(node.value, "yellow")  # Destaca o nó atual
+            gui.update()
+            time.sleep(1)  # Pausa para o usuário ver a comparação
+
+            # Exibe comparação entre o valor atual e o valor inserido
+            if key < node.value:
+                gui.show_comparison(node.value, key, ">")
+                time.sleep(1)
             else:
-                self._insert(root.left, key)
+                gui.show_comparison(node.value, key, "<")
+                time.sleep(1)
+        
+        if key < node.value:
+            node.left = self._insert(node.left, key, gui)
         else:
-            if root.right is None:
-                root.right = Node(key)
-            else:
-                self._insert(root.right, key)
+            node.right = self._insert(node.right, key, gui)
 
-    def delete(self, key):
+        return node
+
+    def delete(self, key, gui=None):
         if self.is_empty():
             print("A árvore está vazia!")
             return
-        self.root = self._delete(self.root, key)
+        self.root = self._delete(self.root, key, gui)
+        
+    def _delete(self, node, key, gui):
+        if node is None:
+            return node
 
-    def _delete(self, root, key):
-        if root is None:
-            return root
+        if gui:
+            # Destaca o nó atual e exibe comparação
+            gui.highlight_node(node.value, "yellow")
+            gui.update()
+            time.sleep(1)
 
-        if key < root.value:
-            root.left = self._delete(root.left, key)
-        elif key > root.value:
-            root.right = self._delete(root.right, key)
+            # Exibe comparação entre o valor atual e o valor a ser removido
+            if key < node.value:
+                gui.show_comparison(node.value, key, ">")
+                time.sleep(1)
+            elif key > node.value:
+                gui.show_comparison(node.value, key, "<")
+                time.sleep(1)
+            else:
+                gui.show_comparison(node.value, key, "=")
+                time.sleep(1)
+
+        if key < node.value:
+            node.left = self._delete(node.left, key, gui)
+        elif key > node.value:
+            node.right = self._delete(node.right, key, gui)
         else:
-            if root.left is None:
-                return root.right
-            elif root.right is None:
-                return root.left
+            # Caso o nó a ser removido tenha dois filhos
+            if node.left is not None and node.right is not None:
+                # Encontrar o maior nó na subárvore esquerda (substituto)
+                max_smaller_node = self._get_max(node.left)
+                
+                if gui:
+                    # Destacar o nó substituto em vermelho
+                    gui.highlight_node(max_smaller_node.value, "red")
+                    gui.update()
+                    time.sleep(1)
+                
+                # Substituir o valor do nó removido pelo valor do substituto
+                node.value = max_smaller_node.value
+                
+                # Remover o nó substituto da subárvore esquerda
+                node.left = self._delete(node.left, max_smaller_node.value, gui)
 
-            max_smaller_node = self._get_max(root.left)
-            root.value = max_smaller_node.value
-            root.left = self._delete(root.left, max_smaller_node.value)
+            # Caso o nó tenha apenas um filho ou nenhum
+            elif node.left is None:
+                return node.right
+            elif node.right is None:
+                return node.left
 
-        return root
+        return node
+
 
     def _get_max(self, node):
         current = node
@@ -189,71 +235,72 @@ class BSTGUI(tk.Tk):
 
     def get_clicked_node(self, x, y):
         for value, (vx, vy) in self.node_positions.items():
-            if (vx - self.node_radius) < x < (vx + self.node_radius) and (vy - self.node_radius) < y < (vy + self.node_radius):
+            if (vx - self.node_radius <= x <= vx + self.node_radius) and (vy - self.node_radius <= y <= vy + self.node_radius):
                 return value
         return None
 
     def insert_node(self):
-        value = self.insert_entry.get()
-        if value.isdigit():
-            self.bst.insert(int(value))
+        try:
+            value = int(self.insert_entry.get())
+            self.bst.insert(value, self)
             self.draw_tree(self.bst.root, self.x_start, self.y_start, 1)
-            self.insert_entry.delete(0, tk.END)
             self.update_button_visibility()
+        except ValueError:
+            pass
 
     def remove_node(self):
-        value = self.remove_entry.get()
-        if value.isdigit():
-            self.bst.delete(int(value))
+        try:
+            value = int(self.remove_entry.get())
+            self.bst.delete(value, self)
             self.draw_tree(self.bst.root, self.x_start, self.y_start, 1)
-            self.remove_entry.delete(0, tk.END)
             self.update_button_visibility()
-    
-    def update_button_visibility(self):
-        if self.bst.is_empty():
-            self.remove_button.pack_forget()
-            self.invert_button.pack_forget()
-            self.inorder_button.pack_forget()
-            self.preorder_button.pack_forget()
-            self.postorder_button.pack_forget()
-        else:
-            self.remove_button.pack()
-            self.invert_button.pack()
-            self.inorder_button.pack()
-            self.preorder_button.pack()
-            self.postorder_button.pack()
+        except ValueError:
+            pass
 
     def invert_tree(self):
         self.bst.invert()
         self.draw_tree(self.bst.root, self.x_start, self.y_start, 1)
-
+        
     def show_inorder(self):
-        self.show_traversal(self.bst.inorder(), 'red')
-
-    def show_preorder(self):
-        self.show_traversal(self.bst.preorder(), 'blue')
-
-    def show_postorder(self):
-        self.show_traversal(self.bst.postorder(), 'green')
-
-    def show_traversal(self, traversal, color):
         self.output_text.delete(1.0, tk.END)
-        for step in traversal:
-            self.output_text.insert(tk.END, f"{step}\n")
-        self.clear_previous_lines()  
-        self.animate_traversal(traversal, color)
+        traversal = self.bst.inorder()
+        self.output_text.insert(tk.END, "In-order: " + str(traversal) + "\n")
+        
+    def show_preorder(self):
+        self.output_text.delete(1.0, tk.END)
+        traversal = self.bst.preorder()
+        self.output_text.insert(tk.END, "Pre-order: " + str(traversal) + "\n")
+        
+    def show_postorder(self):
+        self.output_text.delete(1.0, tk.END)
+        traversal = self.bst.postorder()
+        self.output_text.insert(tk.END, "Post-order: " + str(traversal) + "\n")
 
-    def clear_previous_lines(self):
-        for line in self.current_lines:
-            self.canvas.delete(line)
-        self.current_lines.clear()
+    def highlight_node(self, value, color):
+        if value in self.node_positions:
+            x, y = self.node_positions[value]
+            self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                    x + self.node_radius, y + self.node_radius,
+                                    fill=color, outline='black')
+            self.canvas.create_text(x, y, text=str(value), font=("Arial", 12))
 
-    def animate_traversal(self, traversal, color):
-        for i in range(len(traversal) - 1):
-            x1, y1 = self.node_positions[traversal[i]]
-            x2, y2 = self.node_positions[traversal[i + 1]]
-            line = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, arrow=tk.LAST)
-            self.current_lines.append(line)
+    def show_comparison(self, node_value, value, comparison):
+        self.output_text.delete(1.0, tk.END)
+        self.output_text.insert(tk.END, f"Comparação: {node_value} {comparison} {value}\n")
+
+    def update_button_visibility(self):
+        if self.bst.is_empty():
+            self.remove_button.config(state=tk.DISABLED)
+            self.invert_button.config(state=tk.DISABLED)
+            self.inorder_button.config(state=tk.DISABLED)
+            self.preorder_button.config(state=tk.DISABLED)
+            self.postorder_button.config(state=tk.DISABLED)
+        else:
+            self.remove_button.config(state=tk.NORMAL)
+            self.invert_button.config(state=tk.NORMAL)
+            self.inorder_button.config(state=tk.NORMAL)
+            self.preorder_button.config(state=tk.NORMAL)
+            self.postorder_button.config(state=tk.NORMAL)
 
 if __name__ == "__main__":
     bst = BinarySearchTree()

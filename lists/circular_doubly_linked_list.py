@@ -275,7 +275,7 @@ class CircularDoublyLinkedListGUI:
             self.button_remove_first.grid_forget()
             self.button_remove_last.grid_forget()
             self.button_remove_by_index.grid_forget()
-            self.button_sort.grid_forget()  # Oculta o botão de ordenação se a lista estiver vazia
+            self.button_sort.grid_forget() 
         else:
             self.button_remove_first.grid(row=3, column=0, padx=10, pady=5)
             self.button_remove_last.grid(row=3, column=1, padx=10, pady=5)

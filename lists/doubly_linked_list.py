@@ -209,6 +209,7 @@ class DoublyLinkedListGUI:
         self.canvas.grid(row=7, column=0, columnspan=2)
 
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões ao iniciar
     
     def insert(self):
         data = self.entry_data.get()
@@ -219,6 +220,7 @@ class DoublyLinkedListGUI:
         
         self.linked_list.insert(data)
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões após a inserção
         self.entry_data.delete(0, tk.END)
     
     def add(self):
@@ -230,6 +232,7 @@ class DoublyLinkedListGUI:
         
         self.linked_list.add(data)
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões após a inserção
         self.entry_data.delete(0, tk.END)
     
     def remove_first(self):
@@ -237,62 +240,74 @@ class DoublyLinkedListGUI:
         if removed:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões após a remoção
     
     def remove_last(self):
         removed = self.linked_list.remove_last()
         if removed:
             messagebox.showinfo("Removido", f"Elemento removido: {removed}")
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões após a remoção
     
     def sort_list(self):
         self.linked_list.sort()
         messagebox.showinfo("Ordenação", "Lista ordenada com sucesso!")
         self.update_list_display()
+        self.update_buttons_visibility()  # Atualizar a visibilidade dos botões após a ordenação
 
     def update_list_display(self):
         self.draw_doubly_linked_list()
-        
+    
+    def update_buttons_visibility(self):
+        """Atualiza a visibilidade dos botões dependendo do estado da lista."""
+        if self.linked_list.is_empty():
+            self.button_remove_first.grid_remove()
+            self.button_remove_last.grid_remove()
+            self.button_sort.grid_remove()
+        else:
+            self.button_remove_first.grid()
+            self.button_remove_last.grid()
+            self.button_sort.grid()
+
+        if self.linked_list.is_full():
+            self.button_insert.grid_remove()
+            self.button_add.grid_remove()
+            self.label_data.grid_remove()
+            self.entry_data.grid_remove()
+    
     def draw_doubly_linked_list(self):
-      self.canvas.delete("all")
-      current = self.linked_list.head
-      x_start = 50
-      y_start = 50
-      node_width = 60
-      node_height = 40
-      arrow_offset = 40
+        self.canvas.delete("all")
+        current = self.linked_list.head
+        x_start = 50
+        y_start = 50
+        node_width = 60
+        node_height = 40
+        arrow_offset = 40
 
-      if current:
-        # Centraliza "null" e "head" em relação ao primeiro nó
-         self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, 
-                                x_start, y_start + node_height / 2, arrow=tk.LAST)
-         self.canvas.create_text(x_start - 30, y_start + node_height / 2, text="null", fill="black")
-         self.canvas.create_text(x_start + node_width / 2, y_start - 20, text="head", fill="black")
+        # Desenha o nó "head" e sua seta para "null" à esquerda
+        if self.linked_list.head:
+            self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
+            self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(self.linked_list.head.data))
+            self.canvas.create_text(x_start + node_width / 2, y_start - 20, text="head", fill="black")
+            self.canvas.create_line(x_start, y_start + node_height / 2, x_start - arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+            self.canvas.create_text(x_start - arrow_offset - 20, y_start + node_height / 2, text="null", fill="black")
 
-      while current:
-        # Desenha o retângulo para o nó atual
-        self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
-        self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(current.data))
-
-        if current.next:
-            # Seta do nó atual para o próximo (seta para frente)
-            self.canvas.create_line(x_start + node_width, y_start + node_height / 2, 
-                                    x_start + node_width + arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
-            # Seta do próximo nó de volta para o nó atual (seta para trás)
-            self.canvas.create_line(x_start + node_width + arrow_offset - 10, y_start + node_height / 2 - 10, 
-                                    x_start + node_width + 10, y_start + node_height / 2 - 10, arrow=tk.LAST)
-
-        x_start += node_width + arrow_offset
-        current = current.next
-
-      if self.linked_list.tail:
-        # Centraliza "tail" sobre o último nó
-        self.canvas.create_text(x_start - node_width - arrow_offset, y_start - 20, text="tail", fill="black")
-
-    # Adiciona "null" para o próximo do tail
-      if self.linked_list.tail:
-        self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, 
-                                x_start, y_start + node_height / 2, arrow=tk.LAST)
-        self.canvas.create_text(x_start + 20, y_start + node_height / 2, text="null", fill="black")
+        while current:
+            if current != self.linked_list.head:
+                self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
+                self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(current.data))
+                self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, x_start, y_start + node_height / 2, arrow=tk.LAST)
+            if current.next:
+                self.canvas.create_line(x_start + node_width, y_start + node_height / 2, x_start + node_width + arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+                self.canvas.create_line(x_start + node_width + arrow_offset - 10, y_start + node_height / 2 - 10, x_start + node_width + 10, y_start + node_height / 2 - 10, arrow=tk.LAST)
+            current = current.next
+            x_start += node_width + arrow_offset
+        if self.linked_list.tail:
+            tail_x_position = x_start - (node_width + arrow_offset) / 2
+            self.canvas.create_text(tail_x_position, y_start - 20, text="tail", fill="black")
+            self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, x_start, y_start + node_height / 2, arrow=tk.LAST)
+            self.canvas.create_text(x_start + 30, y_start + node_height / 2, text="null", fill="black")
+ 
 
 if __name__ == "__main__":
     root = tk.Tk()

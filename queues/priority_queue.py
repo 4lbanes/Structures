@@ -89,6 +89,7 @@ class PriorityQueueGUI:
 
         self.queue_items = []  # Armazena os retângulos e textos na tela
         self.update_queue_display()
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões no início
 
     def enqueue(self):
         data = self.entry_data.get()
@@ -110,6 +111,7 @@ class PriorityQueueGUI:
         self.entry_priority.delete(0, tk.END)  # Limpa o campo de prioridade
         
         self.update_queue_display(animated=True)
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após a inserção
 
     def dequeue(self):
         removed = self.queue.dequeue()
@@ -119,6 +121,7 @@ class PriorityQueueGUI:
             messagebox.showwarning("Aviso", "A fila está vazia.")
         
         self.update_queue_display(animated=False)
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após a remoção
 
     def update_queue_display(self, animated=False):
         # Limpa os retângulos antigos
@@ -165,6 +168,19 @@ class PriorityQueueGUI:
                     self.canvas.move(text, -2, 0)
                     self.canvas.update()
                     time.sleep(0.02)
+
+    def update_buttons_visibility(self):
+        if self.queue.is_empty():
+            self.button_dequeue.grid_remove()
+        else:
+            self.button_dequeue.grid(row=5, column=0, columnspan=2)
+        
+        # Não há uma função para verificar se a fila está cheia, então removi o controle relacionado à fila cheia
+        self.button_enqueue.grid(row=4, column=0, columnspan=2)
+        self.label_data.grid(row=2, column=0)
+        self.entry_data.grid(row=2, column=1)
+        self.label_priority.grid(row=3, column=0)
+        self.entry_priority.grid(row=3, column=1)
 
 # Execução da interface gráfica
 root = tk.Tk()
