@@ -268,46 +268,50 @@ class DoublyLinkedListGUI:
             self.button_remove_first.grid()
             self.button_remove_last.grid()
             self.button_sort.grid()
-
-        if self.linked_list.is_full():
-            self.button_insert.grid_remove()
-            self.button_add.grid_remove()
-            self.label_data.grid_remove()
-            self.entry_data.grid_remove()
-    
+            
     def draw_doubly_linked_list(self):
-        self.canvas.delete("all")
-        current = self.linked_list.head
-        x_start = 50
-        y_start = 50
-        node_width = 60
-        node_height = 40
-        arrow_offset = 40
+     self.canvas.delete("all")
+     current = self.linked_list.head
+     x_start = 100
+     y_start = 100
+     node_width = 60
+     node_height = 40
+     arrow_offset = 40
 
-        # Desenha o nó "head" e sua seta para "null" à esquerda
-        if self.linked_list.head:
+     # Desenha o nó "head" e sua seta para "null" à esquerda
+     if self.linked_list.head:
+        self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
+        self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(self.linked_list.head.data))
+        self.canvas.create_text(x_start + node_width / 2, y_start - 20, text="head", fill="black")
+        
+        # Desenha seta para trás (para "null") do head
+        self.canvas.create_line(x_start, y_start + node_height / 2, x_start - arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+        self.canvas.create_text(x_start - arrow_offset - 20, y_start + node_height / 2, text="null", fill="black")
+
+     # Itera sobre os nós e desenha as setas para frente e para trás
+     while current:
+        if current != self.linked_list.head:
             self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
-            self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(self.linked_list.head.data))
-            self.canvas.create_text(x_start + node_width / 2, y_start - 20, text="head", fill="black")
-            self.canvas.create_line(x_start, y_start + node_height / 2, x_start - arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
-            self.canvas.create_text(x_start - arrow_offset - 20, y_start + node_height / 2, text="null", fill="black")
+            self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(current.data))
 
-        while current:
-            if current != self.linked_list.head:
-                self.canvas.create_rectangle(x_start, y_start, x_start + node_width, y_start + node_height, fill="lightblue")
-                self.canvas.create_text(x_start + node_width / 2, y_start + node_height / 2, text=str(current.data))
-                self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, x_start, y_start + node_height / 2, arrow=tk.LAST)
-            if current.next:
-                self.canvas.create_line(x_start + node_width, y_start + node_height / 2, x_start + node_width + arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
-                self.canvas.create_line(x_start + node_width + arrow_offset - 10, y_start + node_height / 2 - 10, x_start + node_width + 10, y_start + node_height / 2 - 10, arrow=tk.LAST)
-            current = current.next
-            x_start += node_width + arrow_offset
-        if self.linked_list.tail:
-            tail_x_position = x_start - (node_width + arrow_offset) / 2
-            self.canvas.create_text(tail_x_position, y_start - 20, text="tail", fill="black")
-            self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, x_start, y_start + node_height / 2, arrow=tk.LAST)
-            self.canvas.create_text(x_start + 30, y_start + node_height / 2, text="null", fill="black")
- 
+            # Desenha a seta para trás (prev)
+            if current.prev:
+                self.canvas.create_line(x_start, y_start + node_height / 2, x_start - arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+        
+        # Desenha a seta para frente (next)
+        if current.next:
+            self.canvas.create_line(x_start + node_width, y_start + node_height / 2, 
+                                    x_start + node_width + arrow_offset, y_start + node_height / 2, arrow=tk.LAST)
+        
+        current = current.next
+        x_start += node_width + arrow_offset
+
+     # Desenha "tail" e seta para "null" à direita do último nó
+     if self.linked_list.tail:
+        tail_x_position = x_start - (node_width + arrow_offset)
+        self.canvas.create_text(tail_x_position, y_start - 20, text="tail", fill="black")
+        self.canvas.create_line(x_start - arrow_offset, y_start + node_height / 2, x_start, y_start + node_height / 2, arrow=tk.LAST)
+        self.canvas.create_text(x_start + arrow_offset + 10, y_start + node_height / 2, text="null", fill="black")
 
 if __name__ == "__main__":
     root = tk.Tk()
