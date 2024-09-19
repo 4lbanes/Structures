@@ -131,38 +131,38 @@ class AVLTree:
         self.root = self._delete(self.root, key, gui)
         
     def _delete(self, node, key, gui):
-     if node is None:
-        return node
+        if node is None:
+            return node
 
-     if gui:
-        gui.highlight_node(node.value, "yellow")
-        gui.update()
-        time.sleep(1)
+        if gui:
+            gui.highlight_node(node.value, "yellow")
+            gui.update()
+            time.sleep(1)
 
-     if key < node.value:
-        node.left = self._delete(node.left, key, gui)
-     elif key > node.value:
-        node.right = self._delete(node.right, key, gui)
-     else:
-        if node.left is None:
-            return node.right
-        elif node.right is None:
-            return node.left
+        if key < node.value:
+            node.left = self._delete(node.left, key, gui)
+        elif key > node.value:
+            node.right = self._delete(node.right, key, gui)
+        else:
+            if node.left is None:
+                return node.right
+            elif node.right is None:
+                return node.left
 
-        temp = self.get_min_value_node(node.right)
-        node.value = temp.value
-        node.right = self._delete(node.right, temp.value, gui)
+            temp = self.get_min_value_node(node.right)
+            node.value = temp.value
+            node.right = self._delete(node.right, temp.value, gui)
 
-     self.update_height(node)
-     balanced_node = self.balance(node)
+        self.update_height(node)
+        balanced_node = self.balance(node)
 
-     if gui and balanced_node != node:
-        gui.highlight_node(node.value, "red")
-        gui.update()
-        time.sleep(1)
+        if gui and balanced_node != node:
+            gui.highlight_node(node.value, "red")
+            gui.update()
+            time.sleep(1)
 
-     return balanced_node
- 
+        return balanced_node
+
     def invert(self):
         self._invert(self.root)
 
@@ -224,35 +224,43 @@ class AVLGUI(tk.Tk):
         self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
         self.canvas.bind("<Button-1>", self.on_click)
 
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões no início
+
     def draw_tree(self, node, x, y, level):
         self.canvas.delete("all")
         self.node_positions.clear()
         self._draw_tree(node, x, y, level)
 
     def _draw_tree(self, node, x, y, level):
-        if node:
-            self.node_positions[node.value] = (x, y)
-            self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
-                                    x + self.node_radius, y + self.node_radius,
-                                    fill='white', outline='black', width=2)
-            self.canvas.create_text(x, y, text=str(node.value), font=("Arial", 12))
+     if node:
+        self.node_positions[node.value] = (x, y)
 
-            if node.left:
-                self.canvas.create_line(x, y + self.node_radius, x - self.horizontal_spacing / level,
-                                        y + self.vertical_spacing - self.node_radius)
-                self._draw_tree(node.left, x - self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+        # Cor sólida no fundo
+        self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                x + self.node_radius, y + self.node_radius,
+                                fill='#ADD8E6', outline='black', width=3)  # Fundo azul claro
 
-            if node.right:
-                self.canvas.create_line(x, y + self.node_radius, x + self.horizontal_spacing / level,
-                                        y + self.vertical_spacing - self.node_radius)
-                self._draw_tree(node.right, x + self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+        # Texto do nó
+        self.canvas.create_text(x, y, text=str(node.value), font=("Arial", 16, "bold"))
 
+        if node.left:
+            self.canvas.create_line(x, y + self.node_radius, x - self.horizontal_spacing / level,
+                                    y + self.vertical_spacing - self.node_radius)
+            self._draw_tree(node.left, x - self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+
+        if node.right:
+            self.canvas.create_line(x, y + self.node_radius, x + self.horizontal_spacing / level,
+                                    y + self.vertical_spacing - self.node_radius)
+            self._draw_tree(node.right, x + self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+
+            
     def on_click(self, event):
         clicked_value = self.get_clicked_node(event.x, event.y)
         if clicked_value:
             print(f"Nó clicado: {clicked_value}")
             self.avl_tree.delete(clicked_value)
             self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+            self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após a exclusão
 
     def get_clicked_node(self, x, y):
         for value, (vx, vy) in self.node_positions.items():
@@ -263,28 +271,24 @@ class AVLGUI(tk.Tk):
     def invert_tree(self):
         self.avl_tree.invert()
         self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+        self.update_buttons_visibility()  # Atualiza a visibilidade dos botões após a inversão
         
     def insert_node(self):
-     value = self.insert_entry.get()
-     if value.isdigit():
-        self.avl_tree.insert(int(value), gui=self)
-        self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-        self.insert_entry.delete(0, tk.END)
-        self.update_button_visibility()  # Atualiza os botões após a inserção
+        value = self.insert_entry.get()
+        if value.isdigit():
+            self.avl_tree.insert(int(value), gui=self)
+            self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+            self.insert_entry.delete(0, tk.END)
+            self.update_buttons_visibility()  # Atualiza os botões após a inserção
         
     def remove_node(self):
-     value = self.remove_entry.get()
-     if value.isdigit():
-        self.avl_tree.delete(int(value), gui=self)
-        self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-        self.remove_entry.delete(0, tk.END)
-        self.update_button_visibility()  # Atualiza os botões após a remoção
+        value = self.remove_entry.get()
+        if value.isdigit():
+            self.avl_tree.delete(int(value), gui=self)
+            self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
+            self.remove_entry.delete(0, tk.END)
+            self.update_buttons_visibility()  # Atualiza os botões após a remoção
 
-    def invert_tree(self):
-     self.avl_tree.invert()
-     self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-     self.update_button_visibility()  # Atualiza os botões após a inversão
-     
     def show_inorder(self):
         self.show_traversal(self.avl_tree.inorder(), 'red')
 
@@ -305,13 +309,41 @@ class AVLGUI(tk.Tk):
         for line in self.current_lines:
             self.canvas.delete(line)
         self.current_lines.clear()
+        
+    def animate_insertion(self, node_value):
+     if node_value in self.node_positions:
+        x, y = self.node_positions[node_value]
+        for i in range(10):  # Faz a animação em 10 passos
+            self.canvas.delete("highlight")  # Remove qualquer destaque anterior
+            self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                    x + self.node_radius, y + self.node_radius,
+                                    outline="green", width=4, tags="highlight")
+            self.canvas.update()
+            time.sleep(0.1)
+
+    def animate_deletion(self, node_value):  
+     if node_value in self.node_positions:
+        x, y = self.node_positions[node_value]
+        for i in range(10):
+            self.canvas.delete("highlight")
+            self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                    x + self.node_radius, y + self.node_radius,
+                                    outline="red", width=4, tags="highlight")
+            self.canvas.update()
+            time.sleep(0.1)
+        # Remove o nó após a animação de exclusão
+        self.canvas.delete("highlight")
 
     def animate_traversal(self, traversal, color):
-        for i in range(len(traversal) - 1):
-            x1, y1 = self.node_positions[traversal[i]]
-            x2, y2 = self.node_positions[traversal[i + 1]]
-            line = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, arrow=tk.LAST)
-            self.current_lines.append(line)
+     self.clear_previous_lines()
+     for i in range(len(traversal)):
+        x, y = self.node_positions[traversal[i]]
+        self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                x + self.node_radius, y + self.node_radius,
+                                outline=color, width=4)
+        self.canvas.update()
+        time.sleep(0.5)  # Aumenta o tempo para a animação ser mais perceptível
+
 
     def highlight_node(self, value, color):
         if value in self.node_positions:
@@ -324,7 +356,7 @@ class AVLGUI(tk.Tk):
         self.output_text.delete(1.0, tk.END)
         self.output_text.insert(tk.END, f"{node_value} {comparison} {inserted_value}\n")
     
-    def update_button_visibility(self):
+    def update_buttons_visibility(self):
         if self.avl_tree.is_empty():
             self.remove_button.config(state=tk.DISABLED)
             self.invert_button.config(state=tk.DISABLED)
@@ -343,5 +375,3 @@ if __name__ == "__main__":
     avl = AVLTree()
     gui = AVLGUI(avl)
     gui.mainloop()
-
-

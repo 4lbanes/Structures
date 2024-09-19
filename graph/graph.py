@@ -84,23 +84,28 @@ class GraphGUI(tk.Tk):
         self.vertices_pos = self.calculate_positions()
         self.start_vertex = None
         self.end_vertex = None
+        self.drag_data = {"vertex": None, "x": 0, "y": 0}
 
         # Create side and bottom frames for organizing the buttons and entries
         self.create_widgets()
 
+        # Bind mouse events to the canvas
+        self.canvas.bind("<ButtonPress-1>", self.on_vertex_press)
+        self.canvas.bind("<B1-Motion>", self.on_vertex_motion)
+        self.canvas.bind("<ButtonRelease-1>", self.on_vertex_release)
+
     def create_widgets(self):
-        # Frame lateral para a área de inserção de vértices e arestas
         side_frame = tk.Frame(self)
         side_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10, pady=10)
 
-        # Área de inserção de vértices
+        # Inserir vértice
         tk.Label(side_frame, text="Inserir vértice:", font=("Arial", 10)).pack(pady=5)
         self.vertex_entry = tk.Entry(side_frame)
         self.vertex_entry.pack(pady=5)
 
         tk.Button(side_frame, text="Inserir", command=self.add_vertex).pack(pady=5)
 
-        # Área de remoção de vértices
+        # Remover vértice
         tk.Label(side_frame, text="Remover vértice:", font=("Arial", 10)).pack(pady=5)
         self.remove_vertex_entry = tk.Entry(side_frame)
         self.remove_vertex_entry.pack(pady=5)
@@ -123,7 +128,7 @@ class GraphGUI(tk.Tk):
         tk.Button(side_frame, text="Adicionar Aresta", command=self.add_edge).pack(pady=5)
         tk.Button(side_frame, text="Remover Aresta", command=self.remove_edge).pack(pady=5)
 
-        # Área do Dijkstra
+        # Dijkstra
         tk.Label(side_frame, text="Dijkstra - Vértice de início:", font=("Arial", 10)).pack(pady=5)
         self.start_entry = tk.Entry(side_frame)
         self.start_entry.pack(pady=5)
@@ -230,7 +235,39 @@ class GraphGUI(tk.Tk):
             self.end_vertex = end_vertex
             self.draw_graph()
 
+    def on_vertex_press(self, event):
+        # Check if the mouse click is inside a vertex
+        for vertex, (x, y) in self.vertices_pos.items():
+            if (x-20) <= event.x <= (x+20) and (y-20) <= event.y <= (y+20):
+                self.drag_data["vertex"] = vertex
+                self.drag_data["x"] = event.x
+                self.drag_data["y"] = event.y
+                break
+
+    def on_vertex_motion(self, event):
+        # Update the position of the dragged vertex
+        vertex = self.drag_data["vertex"]
+        if vertex:
+            dx = event.x - self.drag_data["x"]
+            dy = event.y - self.drag_data["y"]
+
+            x, y = self.vertices_pos[vertex]
+            self.vertices_pos[vertex] = (x + dx, y + dy)
+
+            self.drag_data["x"] = event.x
+            self.drag_data["y"] = event.y
+
+            self.draw_graph()
+
+    def on_vertex_release(self, event):
+        # Reset the drag data when the mouse is released
+        self.drag_data["vertex"] = None
+        self.drag_data["x"] = 0
+        self.drag_data["y"] = 0
+
+
 if __name__ == "__main__":
     graph = Graph()
     app = GraphGUI(graph)
     app.mainloop()
+
