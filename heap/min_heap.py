@@ -1,31 +1,46 @@
 import tkinter as tk
 import math
+import time
 
 class MinHeap:
     def __init__(self):
         self.heap = []
 
-    def insert(self, key):
+    def insert(self, key, gui=None):
         self.heap.append(key)
-        self._heapify_up(len(self.heap) - 1)
+        if gui:
+            gui.update_heap_label()
+        self._heapify_up(len(self.heap) - 1, gui)
 
-    def extract_min(self):
+    def extract_min(self, gui=None):
         if len(self.heap) == 0:
             return None
         min_elem = self.heap[0]
         last_elem = self.heap.pop()
         if len(self.heap) > 0:
             self.heap[0] = last_elem
-            self._heapify_down(0)
+            if gui:
+                gui.update_heap_label()
+            self._heapify_down(0, gui)
         return min_elem
 
-    def _heapify_up(self, index):
+    def _heapify_up(self, index, gui=None):
         parent_index = (index - 1) // 2
         if index > 0 and self.heap[index] < self.heap[parent_index]:
-            self.heap[index], self.heap[parent_index] = self.heap[parent_index], self.heap[index]
-            self._heapify_up(parent_index)
+            if gui:
+                gui.show_comparison(self.heap[parent_index], self.heap[index], ">")
+                gui.highlight_node(index, "red")
+                gui.highlight_node(parent_index, "yellow")
+                gui.update()
+                time.sleep(1)
 
-    def _heapify_down(self, index):
+            self.heap[index], self.heap[parent_index] = self.heap[parent_index], self.heap[index]
+            if gui:
+                gui.update_heap_label()
+                gui.draw_heap()
+            self._heapify_up(parent_index, gui)
+
+    def _heapify_down(self, index, gui=None):
         left_child_index = 2 * index + 1
         right_child_index = 2 * index + 2
         smallest = index
@@ -37,8 +52,18 @@ class MinHeap:
             smallest = right_child_index
 
         if smallest != index:
+            if gui:
+                gui.show_comparison(self.heap[index], self.heap[smallest], "<")
+                gui.highlight_node(index, "yellow")
+                gui.highlight_node(smallest, "red")
+                gui.update()
+                time.sleep(1)
+
             self.heap[index], self.heap[smallest] = self.heap[smallest], self.heap[index]
-            self._heapify_down(smallest)
+            if gui:
+                gui.update_heap_label()
+                gui.draw_heap()
+            self._heapify_down(smallest, gui)
 
 class MinHeapGUI(tk.Tk):
     def __init__(self):
@@ -73,14 +98,20 @@ class MinHeapGUI(tk.Tk):
         self.heap_label = tk.Label(control_frame, text="Heap: []")
         self.heap_label.pack(pady=10)
 
+        # Label para exibir comparações em tempo real
+        self.comparison_label = tk.Label(control_frame, text="Comparação:")
+        self.comparison_label.pack(pady=10)
+
         # Canvas para desenhar a árvore
-        self.canvas = tk.Canvas(self, width=600, height=600, bg="white")
+        self.canvas = tk.Canvas(self, width=1000, height=600, bg="white")
         self.canvas.pack(side=tk.RIGHT, padx=20, pady=20)
 
         # Configuração dos parâmetros de desenho
-        self.node_radius = 13
-        self.horizontal_spacing = 120
+        self.node_radius = 15
         self.vertical_spacing = 60
+        
+        # Dicionário para armazenar as posições dos nós
+        self.node_positions = {}
 
         self.update_heap_label()  # Atualiza o estado inicial dos botões
 
@@ -88,91 +119,63 @@ class MinHeapGUI(tk.Tk):
         value = self.entry.get()
         if value.isdigit():
             value = int(value)
-            self.heap.insert(value)
+            self.heap.insert(value, self)
             self.entry.delete(0, tk.END)
-            self.animate_insert()
+            self.draw_heap()
 
     def extract_min(self):
         if len(self.heap.heap) > 0:
-            min_value = self.heap.extract_min()
-            self.animate_extract(min_value)
+            min_value = self.heap.extract_min(self)
+            self.draw_heap()
 
-    def draw_heap(self, highlighted_nodes=None, highlight_color="yellow", swap_info=None):
+    def draw_heap(self, highlighted_nodes=None):
         self.canvas.delete("all")
+        self.node_positions.clear()  # Limpa as posições antes de desenhar
         if highlighted_nodes is None:
             highlighted_nodes = []
-        if swap_info is None:
-            swap_info = []
         if len(self.heap.heap) > 0:
-            self._draw_nodes(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)), highlighted_nodes, highlight_color, swap_info)
+            depth = math.floor(math.log2(len(self.heap.heap) + 1))  # Calcula a profundidade da árvore
+            self._draw_nodes(0, 500, 50, depth, highlighted_nodes)
 
-    def _draw_nodes(self, index, x, y, levels, highlighted_nodes, highlight_color, swap_info):
+    def _draw_nodes(self, index, x, y, levels, highlighted_nodes):
         if index < len(self.heap.heap):
             # Cor de destaque para o nó
-            color = highlight_color if index in highlighted_nodes else "lightblue"
+            color = "yellow" if index in highlighted_nodes else "lightblue"
             self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
                                     x + self.node_radius, y + self.node_radius, fill=color)
             self.canvas.create_text(x, y, text=str(self.heap.heap[index]))
+            
+            # Armazena a posição do nó
+            self.node_positions[index] = (x, y)
 
             left_child_index = 2 * index + 1
             right_child_index = 2 * index + 2
 
+            # Espaçamento dinâmico horizontal com base na profundidade da árvore e direção dos filhos
+            horizontal_spacing = 300 / (2 ** (levels - 1))  # Aumenta o espaçamento
+
             if left_child_index < len(self.heap.heap):
-                x_left = x - self.horizontal_spacing / (2 ** (levels - 1))
+                x_left = x - horizontal_spacing
                 y_left = y + self.vertical_spacing
                 self.canvas.create_line(x, y + self.node_radius, x_left, y_left - self.node_radius)
-                if (index, left_child_index) in swap_info:
-                    self.canvas.create_line(x, y, x_left, y_left, fill="red", width=2)
-                self._draw_nodes(left_child_index, x_left, y_left, levels - 1, highlighted_nodes, highlight_color, swap_info)
+                self._draw_nodes(left_child_index, x_left, y_left, levels - 1, highlighted_nodes)
 
             if right_child_index < len(self.heap.heap):
-                x_right = x + self.horizontal_spacing / (2 ** (levels - 1))
+                x_right = x + horizontal_spacing
                 y_right = y + self.vertical_spacing
                 self.canvas.create_line(x, y + self.node_radius, x_right, y_right - self.node_radius)
-                if (index, right_child_index) in swap_info:
-                    self.canvas.create_line(x, y, x_right, y_right, fill="red", width=2)
-                self._draw_nodes(right_child_index, x_right, y_right, levels - 1, highlighted_nodes, highlight_color, swap_info)
+                self._draw_nodes(right_child_index, x_right, y_right, levels - 1, highlighted_nodes)
 
-    def animate_insert(self):
-        self.canvas.delete("all")
-        self._animate_insert(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)), [])
+    def show_comparison(self, node_value, value, comparison):
+        # Exibe comparações na interface
+        self.comparison_label.config(text=f"Comparação: {node_value} {comparison} {value}")
 
-    def _animate_insert(self, index, x, y, levels, highlighted_nodes):
+    def highlight_node(self, index, color):
         if index < len(self.heap.heap):
-            highlighted_nodes.append(index)
-            self.draw_heap(highlighted_nodes=highlighted_nodes)
-            self.after(500, self._animate_insert, 2 * index + 1, x - self.horizontal_spacing / (2 ** (levels - 1)), y + self.vertical_spacing, levels - 1, highlighted_nodes)
-            self.after(500, self._animate_insert, 2 * index + 2, x + self.horizontal_spacing / (2 ** (levels - 1)), y + self.vertical_spacing, levels - 1, highlighted_nodes)
-            if index == len(self.heap.heap) - 1:
-                self.after(1000, self.draw_heap)
-
-    def animate_extract(self, min_value):
-        self.canvas.delete("all")
-        self._animate_extract(0, 300, 50, math.floor(math.log2(len(self.heap.heap) + 1)), min_value, [])
-
-    def _animate_extract(self, index, x, y, levels, min_value, highlighted_nodes):
-        if index < len(self.heap.heap):
-            highlighted_nodes.append(index)
-            self.draw_heap(highlighted_nodes=highlighted_nodes)
-            left_child_index = 2 * index + 1
-            right_child_index = 2 * index + 2
-            swap_info = []
-
-            if left_child_index < len(self.heap.heap):
-                swap_info.append((index, left_child_index))
-            if right_child_index < len(self.heap.heap):
-                swap_info.append((index, right_child_index))
-
-            self._draw_nodes(index, x, y, levels, highlighted_nodes, "lightblue", swap_info)
-            if len(swap_info) > 0:
-                self.after(500, self.draw_heap, highlighted_nodes, "yellow", swap_info)
-            if left_child_index < len(self.heap.heap):
-                self.after(1000, self._animate_extract, left_child_index, x - self.horizontal_spacing / (2 ** (levels - 1)), y + self.vertical_spacing, levels - 1, min_value, highlighted_nodes)
-            if right_child_index < len(self.heap.heap):
-                self.after(1000, self._animate_extract, right_child_index, x + self.horizontal_spacing / (2 ** (levels - 1)), y + self.vertical_spacing, levels - 1, min_value, highlighted_nodes)
-
-            if index == 0:
-                self.after(2000, self.draw_heap, highlighted_nodes, "lightblue")
+            x, y = self.node_positions.get(index, (None, None))
+            if x and y:
+                self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
+                                        x + self.node_radius, y + self.node_radius, fill=color)
 
     def update_heap_label(self):
         self.heap_label.config(text=f"Heap: {self.heap.heap}")
