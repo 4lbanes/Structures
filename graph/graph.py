@@ -93,6 +93,7 @@ class GraphGUI(tk.Tk):
         self.canvas.bind("<ButtonPress-1>", self.on_vertex_press)
         self.canvas.bind("<B1-Motion>", self.on_vertex_motion)
         self.canvas.bind("<ButtonRelease-1>", self.on_vertex_release)
+        self.canvas.bind("<ButtonPress-3>", self.remove_vertex_on_click)  # Right-click for vertex removal
 
     def create_widgets(self):
         side_frame = tk.Frame(self)
@@ -138,6 +139,9 @@ class GraphGUI(tk.Tk):
         self.end_entry.pack(pady=5)
 
         tk.Button(side_frame, text="Encontrar menor caminho", command=self.find_shortest_path).pack(pady=10)
+        
+        self.cost_label = tk.Label(side_frame, text="Custo total: 0", font=("Arial", 10))
+        self.cost_label.pack(pady=5)
 
     def calculate_positions(self):
         vertices = self.graph.get_vertices()
@@ -174,7 +178,7 @@ class GraphGUI(tk.Tk):
             self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=str(weight), fill="black")
 
         for vertex, (x, y) in self.vertices_pos.items():
-            fill_color = "lightblue" if len(self.graph.graph[vertex]) <= 2 else "lightgreen"
+            fill_color = "lightblue" if len(self.graph.graph[vertex]) <= 2 else "lightblue"
             self.canvas.create_oval(x-20, y-20, x+20, y+20, fill=fill_color, outline="black")
             self.canvas.create_text(x, y, text=vertex)
 
@@ -203,8 +207,10 @@ class GraphGUI(tk.Tk):
         vertex1 = self.vertex1_entry.get().strip()
         vertex2 = self.vertex2_entry.get().strip()
         weight = self.weight_entry.get().strip()
+
         if vertex1 and vertex2:
-            self.graph.add_edge(vertex1, vertex2, int(weight) if weight else 1)
+            weight = int(weight) if weight else 1
+            self.graph.add_edge(vertex1, vertex2, weight)
             self.vertex1_entry.delete(0, tk.END)
             self.vertex2_entry.delete(0, tk.END)
             self.weight_entry.delete(0, tk.END)
@@ -218,6 +224,15 @@ class GraphGUI(tk.Tk):
             self.vertices_pos = self.calculate_positions()
             self.draw_graph()
 
+    def remove_vertex_on_click(self, event):
+        x, y = event.x, event.y
+        for vertex, (vx, vy) in self.vertices_pos.items():
+            if (vx - 20 <= x <= vx + 20) and (vy - 20 <= y <= vy + 20):
+                self.graph.remove_vertex(vertex)
+                self.vertices_pos = self.calculate_positions()
+                self.draw_graph()
+                break
+
     def remove_edge(self):
         vertex1 = self.vertex1_entry.get().strip()
         vertex2 = self.vertex2_entry.get().strip()
@@ -230,44 +245,39 @@ class GraphGUI(tk.Tk):
     def find_shortest_path(self):
         start_vertex = self.start_entry.get().strip()
         end_vertex = self.end_entry.get().strip()
+
         if start_vertex and end_vertex:
+            path = self.graph.dijkstra(start_vertex, end_vertex)
+            if path:
+                total_cost = sum(self.graph.weights.get((path[i], path[i + 1]), 1) for i in range(len(path) - 1))
+                self.cost_label.config(text=f"Custo total: {total_cost}")
+            else:
+                self.cost_label.config(text="Caminho não encontrado")
+
             self.start_vertex = start_vertex
             self.end_vertex = end_vertex
             self.draw_graph()
 
     def on_vertex_press(self, event):
-        # Check if the mouse click is inside a vertex
-        for vertex, (x, y) in self.vertices_pos.items():
-            if (x-20) <= event.x <= (x+20) and (y-20) <= event.y <= (y+20):
+        x, y = event.x, event.y
+        for vertex, (vx, vy) in self.vertices_pos.items():
+            if (vx - 20 <= x <= vx + 20) and (vy - 20 <= y <= vy + 20):
                 self.drag_data["vertex"] = vertex
-                self.drag_data["x"] = event.x
-                self.drag_data["y"] = event.y
+                self.drag_data["x"] = x - vx
+                self.drag_data["y"] = y - vy
                 break
 
     def on_vertex_motion(self, event):
-        # Update the position of the dragged vertex
         vertex = self.drag_data["vertex"]
         if vertex:
-            dx = event.x - self.drag_data["x"]
-            dy = event.y - self.drag_data["y"]
-
-            x, y = self.vertices_pos[vertex]
-            self.vertices_pos[vertex] = (x + dx, y + dy)
-
-            self.drag_data["x"] = event.x
-            self.drag_data["y"] = event.y
-
+            new_x, new_y = event.x - self.drag_data["x"], event.y - self.drag_data["y"]
+            self.vertices_pos[vertex] = (new_x, new_y)
             self.draw_graph()
 
     def on_vertex_release(self, event):
-        # Reset the drag data when the mouse is released
         self.drag_data["vertex"] = None
-        self.drag_data["x"] = 0
-        self.drag_data["y"] = 0
-
 
 if __name__ == "__main__":
     graph = Graph()
     app = GraphGUI(graph)
     app.mainloop()
-
