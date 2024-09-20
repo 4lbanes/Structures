@@ -68,7 +68,7 @@ class MinHeap:
 class MinHeapGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("MinHeap Visualization")
+        self.title("MinHeap: ")
         self.heap = MinHeap()
         
         # Frame para os controles à esquerda

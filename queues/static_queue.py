@@ -51,15 +51,26 @@ class StaticQueue:
         return self.queue[:self.size]  # Retorna apenas os elementos válidos da fila
 
     def sort_queue(self):
-        # Implementa a ordenação dos elementos sem usar funções nativas do Python
-        if self.is_empty():
-            return
-        
-        # Algoritmo de ordenação básico (bolha) para a fila
-        for i in range(self.size - 1):
-            for j in range(self.size - 1 - i):
-                if self.queue[j] > self.queue[j + 1]:
-                    self.queue[j], self.queue[j + 1] = self.queue[j + 1], self.queue[j]
+     if self.is_empty():
+        return
+    
+     # Converter os elementos para inteiros para ordenar corretamente
+     elements_to_sort = [int(item) for item in self.queue if item is not None]
+
+     # Algoritmo de ordenação bolha
+     for i in range(len(elements_to_sort) - 1):
+        for j in range(len(elements_to_sort) - 1 - i):
+            if elements_to_sort[j] > elements_to_sort[j + 1]:
+                elements_to_sort[j], elements_to_sort[j + 1] = elements_to_sort[j + 1], elements_to_sort[j]
+    
+     # Atualizar a fila com os elementos ordenados
+     for i in range(len(elements_to_sort)):
+        self.queue[i] = str(elements_to_sort[i])  # Convertendo de volta para string
+
+     # Preencher o restante da fila com None
+     for i in range(len(elements_to_sort), self.size_max):
+        self.queue[i] = None
+
 # Interface com Tkinter
 class StaticQueueGUI:
     def __init__(self, root, max_size):

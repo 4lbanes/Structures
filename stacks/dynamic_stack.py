@@ -49,7 +49,7 @@ class DynamicStackGUI:
     def __init__(self, root, stack):
         self.stack = stack
         self.root = root
-        self.root.title("Pilha Dinâmica")
+        self.root.title("Pilha Dinâmica: ")
 
         self.root.geometry("800x600")  # Definir um tamanho maior para a janela
 

@@ -75,7 +75,7 @@ class GraphGUI(tk.Tk):
     def __init__(self, graph):
         super().__init__()
         self.graph = graph
-        self.title("Visualização do Grafo com Dijkstra")
+        self.title("Grafos:")
 
         # Create a main canvas for graph visualization
         self.canvas = tk.Canvas(self, width=600, height=600, bg="white")

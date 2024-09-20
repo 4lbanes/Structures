@@ -80,7 +80,7 @@ class HashTable:
 class HashTableGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Visualização da Tabela Hash")
+        self.root.title("Tabela Hash: ")
 
         self.hash_table = HashTable(10)
 

@@ -187,7 +187,7 @@ class AVLGUI(tk.Tk):
     def __init__(self, avl_tree):
         super().__init__()
         self.avl_tree = avl_tree
-        self.title("Visualização da Árvore AVL")
+        self.title("Árvore AVL: ")
 
         self.left_frame = tk.Frame(self)
         self.left_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)

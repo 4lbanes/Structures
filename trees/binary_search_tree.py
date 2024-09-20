@@ -104,7 +104,6 @@ class BinarySearchTree:
 
         return node
 
-
     def _get_max(self, node):
         current = node
         while current.right is not None:
@@ -155,7 +154,7 @@ class BSTGUI(tk.Tk):
     def __init__(self, bst):
         super().__init__()
         self.bst = bst
-        self.title("Visualização da Árvore Binária de Busca")
+        self.title("Árvore Binária de Busca: ")
         
         self.left_frame = tk.Frame(self)
         self.left_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)

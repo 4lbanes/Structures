@@ -46,21 +46,23 @@ class StaticStack:
         return self.items[::-1]  # Retorna a pilha invertida (base no final)
     
     def sort_stack(self):
-        if self.is_empty():
-            return
-        # Converte números para comparação e mantém strings como estão
-        def convert(item):
-            try:
-                return int(item)
-            except ValueError:
-                return item
-        self.items.sort(key=lambda x: (isinstance(convert(x), str), convert(x)))
+     if self.is_empty():
+        return
+     # Converte números para comparação e mantém strings como estão
+     def convert(item):
+        try:
+            return float(item)  # Converte para número se possível
+        except ValueError:
+            return item  # Mantém como string
+    
+     # Ordenar pelo valor numérico e colocar os menores no topo
+     self.items.sort(key=lambda x: convert(x))
 
 class StaticStackGUI:
     def __init__(self, root, max_size):
         self.stack = StaticStack(max_size)  
         self.root = root
-        self.root.title("Pilha Estática")
+        self.root.title("Pilha Estática: ")
 
         self.root.geometry("800x600")  # Define o tamanho da janela
 
