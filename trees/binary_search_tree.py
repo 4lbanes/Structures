@@ -210,20 +210,30 @@ class BSTGUI(tk.Tk):
         self._draw_tree(node, x, y, level)
 
     def _draw_tree(self, node, x, y, level):
-        if node:
+     if node:
+            # Aumenta o espaçamento horizontal e vertical
+            level_spacing = (self.horizontal_spacing / level) * 4  # Aumenta a margem horizontal
+            vertical_spacing = self.vertical_spacing * 1.2  # Aumenta a margem vertical
+            
             self.node_positions[node.value] = (x, y)
             self.canvas.create_oval(x - self.node_radius, y - self.node_radius,
-                                    x + self.node_radius, y + self.node_radius,
-                                    fill='lightblue', outline='black')
+                                     x + self.node_radius, y + self.node_radius,
+                                     fill='lightblue', outline='black')
             self.canvas.create_text(x, y, text=str(node.value), font=("Arial", 12))
             
             if node.left:
-                self.canvas.create_line(x, y + self.node_radius, x - self.horizontal_spacing / level, y + self.vertical_spacing - self.node_radius)
-                self._draw_tree(node.left, x - self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+                # Desenha a linha e o nó da subárvore esquerda
+                self.canvas.create_line(x, y + self.node_radius, 
+                                        x - level_spacing, y + vertical_spacing - self.node_radius)
+                self._draw_tree(node.left, x - level_spacing, y + vertical_spacing, level + 1)
                 
             if node.right:
-                self.canvas.create_line(x, y + self.node_radius, x + self.horizontal_spacing / level, y + self.vertical_spacing - self.node_radius)
-                self._draw_tree(node.right, x + self.horizontal_spacing / level, y + self.vertical_spacing, level + 1)
+                # Desenha a linha e o nó da subárvore direita
+                self.canvas.create_line(x, y + self.node_radius, 
+                                        x + level_spacing, y + vertical_spacing - self.node_radius)
+                self._draw_tree(node.right, x + level_spacing, y + vertical_spacing, level + 1)
+
+
 
     def on_click(self, event):
         clicked_value = self.get_clicked_node(event.x, event.y)
