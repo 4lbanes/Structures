@@ -10,7 +10,6 @@ class Node:
 class DynamicQueue:
     def __init__(self):
         self.front = None  # O início da fila
-        self.rear = None   # O final da fila
         self.size = 0      # Tamanho da fila
     
     def is_empty(self):
@@ -18,11 +17,13 @@ class DynamicQueue:
     
     def enqueue(self, item):
         new_node = Node(item)
-        if self.rear is None:  # Se a fila estiver vazia
-            self.front = self.rear = new_node
+        if self.front is None:  # Se a fila estiver vazia
+            self.front = new_node
         else:
-            self.rear.next = new_node
-            self.rear = new_node
+            current = self.front
+            while current.next:
+                current = current.next
+            current.next = new_node
         
         self.size += 1
         print(f"{item} foi adicionado à fila.")
@@ -34,9 +35,6 @@ class DynamicQueue:
         
         removed_value = self.front.data
         self.front = self.front.next
-        if self.front is None:  # Se a fila ficou vazia
-            self.rear = None
-        
         self.size -= 1
         print(f"{removed_value} foi removido da fila.")
         return removed_value
@@ -48,27 +46,26 @@ class DynamicQueue:
         return self.front.data
     
     def sort_queue(self):
-     if self.is_empty():
-        return
+        if self.is_empty():
+            return
     
-     nodes = []
-     current = self.front
-     while current:
-        try:
-            nodes.append(int(current.data))
-        except ValueError:
-            nodes.append(current.data)
-        current = current.next
+        nodes = []
+        current = self.front
+        while current:
+            try:
+                nodes.append(int(current.data))
+            except ValueError:
+                nodes.append(current.data)
+            current = current.next
+        
+        # Ordena primeiro números, depois strings
+        nodes.sort(key=lambda x: (isinstance(x, str), x))
     
-    # Ordena primeiro números, depois strings
-     nodes.sort(key=lambda x: (isinstance(x, str), x))
-    
-    # Reconstrói a fila ordenada
-     self.front = None
-     self.rear = None
-     self.size = 0
-     for data in nodes:
-       self.enqueue(data)
+        # Reconstrói a fila ordenada
+        self.front = None
+        self.size = 0
+        for data in nodes:
+            self.enqueue(data)
     
     def print_queue(self):
         if self.is_empty():
@@ -163,8 +160,6 @@ class DynamicQueueGUI:
 
             if index == 0:
                 text_str = f"Topo\n{item_str}"
-            elif index == len(queue_list) - 1:
-                text_str = f"Base\n{item_str}"
             else:
                 text_str = item_str
 
@@ -175,13 +170,26 @@ class DynamicQueueGUI:
 
             self.queue_items.append((square, text))
 
-            # Se for para animar, move o quadrado da direita para a esquerda
-            if animated:
-                for step in range(10):
-                    self.canvas.move(square, -2, 0)
-                    self.canvas.move(text, -2, 0)
-                    self.canvas.update()
-                    time.sleep(0.02)
+            # Anima apenas o novo item adicionado
+            if animated and index == len(queue_list) - 1:
+                self.animate_insertion(square, text, x_position)
+
+    def animate_insertion(self, square, text, final_x):
+        initial_x = 800  # Começa do lado direito fora da tela
+        y_center = self.canvas.winfo_height() // 2
+        
+        # Divida o movimento em etapas menores para simular a curva
+        steps = 70  # Mais passos para diminuir a velocidade
+        for step in range(steps):
+            # Movimento não linear (curvado)
+            progress = step / steps
+            x_step = initial_x + (final_x - initial_x) * progress
+            y_offset = -30 * (1 - progress)  # A curva vai suavizando
+            
+            self.canvas.coords(square, x_step, y_center - 20 + y_offset, x_step + 100, y_center + 20 + y_offset)
+            self.canvas.coords(text, x_step + 50, y_center + y_offset)
+            self.canvas.update()
+            time.sleep(0.03)  # Mais tempo para diminuir a velocidade
 
     def update_buttons_visibility(self):
         if self.queue.is_empty():
@@ -194,4 +202,4 @@ class DynamicQueueGUI:
 # Criação da interface
 root = tk.Tk()
 app = DynamicQueueGUI(root, 5)
-root.mainloop()
+root.mainloop() 

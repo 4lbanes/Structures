@@ -170,8 +170,6 @@ class StaticStackGUI:
 
             if index == 0:  
                 text_str = f"Topo\n{item_str}"  # O primeiro item desenhado é o topo
-            elif index == len(stack_items) - 1:  
-                text_str = f"Base\n{item_str}"  # O último item desenhado é a base
             else:
                 text_str = item_str
 

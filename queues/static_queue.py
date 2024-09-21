@@ -17,6 +17,7 @@ class StaticQueue:
     def enqueue(self, value):
         if self.is_full():
             print("Queue is Full!")
+            return
         
         # Insere o novo valor no final da fila
         self.queue[self.size] = value
@@ -25,7 +26,8 @@ class StaticQueue:
     
     def dequeue(self):
         if self.is_empty():
-         print("Queue is Empty")
+            print("Queue is Empty")
+            return None
         
         # Remove o primeiro elemento da fila
         removed_element = self.queue[0]
@@ -42,7 +44,8 @@ class StaticQueue:
     
     def peek(self):  # Mostra o primeiro elemento da fila sem removê-lo
         if self.is_empty():
-         print("Queue is Empty")
+            print("Queue is Empty")
+            return None
         return self.queue[0]
 
     def print_queue(self):
@@ -51,25 +54,25 @@ class StaticQueue:
         return self.queue[:self.size]  # Retorna apenas os elementos válidos da fila
 
     def sort_queue(self):
-     if self.is_empty():
-        return
-    
-     # Converter os elementos para inteiros para ordenar corretamente
-     elements_to_sort = [int(item) for item in self.queue if item is not None]
+        if self.is_empty():
+            return
+        
+        # Converter os elementos para inteiros para ordenar corretamente
+        elements_to_sort = [int(item) for item in self.queue if item is not None]
 
-     # Algoritmo de ordenação bolha
-     for i in range(len(elements_to_sort) - 1):
-        for j in range(len(elements_to_sort) - 1 - i):
-            if elements_to_sort[j] > elements_to_sort[j + 1]:
-                elements_to_sort[j], elements_to_sort[j + 1] = elements_to_sort[j + 1], elements_to_sort[j]
-    
-     # Atualizar a fila com os elementos ordenados
-     for i in range(len(elements_to_sort)):
-        self.queue[i] = str(elements_to_sort[i])  # Convertendo de volta para string
+        # Algoritmo de ordenação bolha
+        for i in range(len(elements_to_sort) - 1):
+            for j in range(len(elements_to_sort) - 1 - i):
+                if elements_to_sort[j] > elements_to_sort[j + 1]:
+                    elements_to_sort[j], elements_to_sort[j + 1] = elements_to_sort[j + 1], elements_to_sort[j]
+        
+        # Atualizar a fila com os elementos ordenados
+        for i in range(len(elements_to_sort)):
+            self.queue[i] = str(elements_to_sort[i])  # Convertendo de volta para string
 
-     # Preencher o restante da fila com None
-     for i in range(len(elements_to_sort), self.size_max):
-        self.queue[i] = None
+        # Preencher o restante da fila com None
+        for i in range(len(elements_to_sort), self.size_max):
+            self.queue[i] = None
 
 # Interface com Tkinter
 class StaticQueueGUI:
@@ -126,7 +129,7 @@ class StaticQueueGUI:
         else:
             messagebox.showwarning("Aviso", "A fila está vazia.")
         
-        self.update_queue_display()
+        self.update_queue_display(animated=False)
         self.update_buttons_visibility()
 
     def sort_queue(self):
@@ -160,8 +163,6 @@ class StaticQueueGUI:
 
             if index == 0:
                 text_str = f"Topo\n{item_str}"
-            elif index == len(queue_list) - 1:
-                text_str = f"Base\n{item_str}"
             else:
                 text_str = item_str
 
@@ -173,12 +174,25 @@ class StaticQueueGUI:
             self.queue_items.append((square, text))
 
             # Se for para animar, move o quadrado da direita para a esquerda
-            if animated:
-                for step in range(10):
-                    self.canvas.move(square, -2, 0)
-                    self.canvas.move(text, -2, 0)
-                    self.canvas.update()
-                    time.sleep(0.02)
+            if animated and index == len(queue_list) - 1:
+                self.animate_insertion(square, text, x_position)
+
+    def animate_insertion(self, square, text, final_x):
+        initial_x = 800  # Começa do lado direito fora da tela
+        y_center = self.canvas.winfo_height() // 2
+        
+        # Divida o movimento em etapas menores para simular a curva
+        steps = 70  # Mais passos para diminuir a velocidade
+        for step in range(steps):
+            # Movimento não linear (curvado)
+            progress = step / steps
+            x_step = initial_x + (final_x - initial_x) * progress
+            y_offset = -30 * (1 - progress)  # A curva vai suavizando
+            
+            self.canvas.coords(square, x_step, y_center - 20 + y_offset, x_step + 100, y_center + 20 + y_offset)
+            self.canvas.coords(text, x_step + 50, y_center + y_offset)
+            self.canvas.update()
+            time.sleep(0.03)  # Mais tempo para diminuir a velocidade 
 
     def update_buttons_visibility(self):
         if self.queue.is_empty():

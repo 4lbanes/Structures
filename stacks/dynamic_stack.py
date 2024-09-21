@@ -162,8 +162,6 @@ class DynamicStackGUI:
             # Verifica se é o topo ou a base para personalizar o texto
             if index == 0:  # Se for o topo da pilha
                 text_str = f"Topo\n{item_str}"
-            elif index == len(stack_elements) - 1:  # Se for a base da pilha
-                text_str = f"Base\n{item_str}"
             else:
                 text_str = item_str  # Apenas o valor para os demais itens
 
