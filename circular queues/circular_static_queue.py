@@ -76,7 +76,7 @@ class CircularQueueGUI:
         
         self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue)
         self.button_enqueue.grid(row=2, column=0, columnspan=2)
-
+        
         self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)
         self.button_sort = tk.Button(root, text="Ordenar Fila", command=self.sort_queue)
 
@@ -188,6 +188,8 @@ class CircularQueueGUI:
         
      if self.queue.is_full():
          self.button_enqueue.grid_forget()
+     else:
+         self.button_enqueue.grid(row=2, column=0, columnspan=2)
  
 
 # Criação da interface

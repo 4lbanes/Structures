@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import time
 
@@ -59,8 +60,13 @@ class AVLTree:
                 node.right = self.right_rotation(node.right)
             node = self.left_rotation(node)
         return node
-
     def insert(self, key, gui=None):
+        # Verifica se o valor já existe antes de inserir
+        if self.search(key):
+            if gui:
+                gui.output_text.insert(tk.END, f"Nó com valor {key} já existe.\n")
+                gui.output_text.see(tk.END)
+            return
         if self.root is None:
             self.root = Node(key)
         else:
@@ -96,6 +102,19 @@ class AVLTree:
             time.sleep(1)  # Pausa para o usuário ver a rotação
 
         return balanced_node
+
+    def search(self, key):
+        return self._search(self.root, key)
+
+    def _search(self, node, key):
+        if node is None:
+            return False
+        if key == node.value:
+            return True
+        elif key < node.value:
+            return self._search(node.left, key)
+        else:
+            return self._search(node.right, key)
     
     def inorder(self):
         return self._inorder(self.root, [])
@@ -342,4 +361,3 @@ if __name__ == "__main__":
     avl_tree = AVLTree()
     gui = AVLGUI(avl_tree)
     gui.mainloop()  
-

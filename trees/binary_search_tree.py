@@ -23,29 +23,35 @@ class BinarySearchTree:
             self.root = self._insert(self.root, key, gui)
 
     def _insert(self, node, key, gui):
-        if node is None:
-            return Node(key)
-        
-        # Destacar o nó atual e mostrar comparação, se a GUI estiver ativada
-        if gui:
-            gui.highlight_node(node.value, "yellow")  # Destaca o nó atual
-            gui.update()
-            time.sleep(1)  # Pausa para o usuário ver a comparação
+     if node is None:
+        return Node(key)
+    
+     # Destacar o nó atual e mostrar comparação, se a GUI estiver ativada
+     if gui:
+        gui.highlight_node(node.value, "yellow")  # Destaca o nó atual
+        gui.update()
+        time.sleep(1)  # Pausa para o usuário ver a comparação
 
-            # Exibe comparação entre o valor atual e o valor inserido
-            if key < node.value:
-                gui.show_comparison(node.value, key, ">")
-                time.sleep(1)
-            else:
-                gui.show_comparison(node.value, key, "<")
-                time.sleep(1)
-        
+        # Exibe comparação entre o valor atual e o valor inserido
         if key < node.value:
-            node.left = self._insert(node.left, key, gui)
+            gui.show_comparison(node.value, key, ">")
+            time.sleep(1)
+        elif key > node.value:
+            gui.show_comparison(node.value, key, "<")
+            time.sleep(1)
         else:
-            node.right = self._insert(node.right, key, gui)
+            gui.show_comparison(node.value, key, "=")
+            time.sleep(1)
+            # Exibe mensagem de valor duplicado
+            gui.output_text.insert(tk.END, "Valor duplicado não pode ser inserido!\n")
+            return node
 
-        return node
+     if key < node.value:
+        node.left = self._insert(node.left, key, gui)
+     elif key > node.value:
+        node.right = self._insert(node.right, key, gui)
+
+     return node
 
     def delete(self, key, gui=None):
         if self.is_empty():
@@ -295,7 +301,7 @@ class BSTGUI(tk.Tk):
 
     def show_comparison(self, node_value, value, comparison):
         self.output_text.delete(1.0, tk.END)
-        self.output_text.insert(tk.END, f"Comparação: {node_value} {comparison} {value}\n")
+        self.output_text.insert(tk.END, f"{node_value} {comparison} {value}\n")
 
     def update_button_visibility(self):
         if self.bst.is_empty():
