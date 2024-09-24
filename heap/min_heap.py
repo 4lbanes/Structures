@@ -89,10 +89,6 @@ class MinHeapGUI(tk.Tk):
         # Botão para extrair o mínimo
         self.extract_button = tk.Button(control_frame, text="Extrair Min", command=self.extract_min)
         self.extract_button.pack(pady=5)
-
-        # Botão para printar o heap
-        self.print_button = tk.Button(control_frame, text="Printar", command=self.print_heap)
-        self.print_button.pack(pady=5)
         
         # Label para exibir o conteúdo do heap (vetor)
         self.heap_label = tk.Label(control_frame, text="Heap: []")
@@ -168,7 +164,7 @@ class MinHeapGUI(tk.Tk):
 
     def show_comparison(self, node_value, value, comparison):
         # Exibe comparações na interface
-        self.comparison_label.config(text=f"Comparação: {node_value} {comparison} {value}")
+        self.comparison_label.config(text=f"{node_value} {comparison} {value}")
 
     def highlight_node(self, index, color):
         if index < len(self.heap.heap):
@@ -183,6 +179,12 @@ class MinHeapGUI(tk.Tk):
     def print_heap(self):
         self.update_heap_label()
         self.draw_heap()
+    
+    def update_button_visibility(self):
+        if self.heap.is_empty():
+            self.extract_button.pack_forget()
+        else:
+            self.extract_button.pack()
 
 if __name__ == "__main__":
     app = MinHeapGUI()

@@ -305,17 +305,17 @@ class BSTGUI(tk.Tk):
 
     def update_button_visibility(self):
         if self.bst.is_empty():
-            self.remove_button.config(state=tk.DISABLED)
-            self.invert_button.config(state=tk.DISABLED)
-            self.inorder_button.config(state=tk.DISABLED)
-            self.preorder_button.config(state=tk.DISABLED)
-            self.postorder_button.config(state=tk.DISABLED)
+            self.invert_button.pack_forget()
+            self.remove_button.pack_forget()
+            self.postorder_button.pack_forget()
+            self.inorder_button.pack_forget()
+            self.preorder_button.pack_forget()
         else:
-            self.remove_button.config(state=tk.NORMAL)
-            self.invert_button.config(state=tk.NORMAL)
-            self.inorder_button.config(state=tk.NORMAL)
-            self.preorder_button.config(state=tk.NORMAL)
-            self.postorder_button.config(state=tk.NORMAL)
+            self.invert_button.pack()
+            self.remove_button.pack()
+            self.postorder_button.pack()
+            self.inorder_button.pack()
+            self.preorder_button.pack()
 
 if __name__ == "__main__":
     bst = BinarySearchTree()

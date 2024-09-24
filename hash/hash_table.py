@@ -82,7 +82,7 @@ class HashTableGUI:
         self.root = root
         self.root.title("Tabela Hash: ")
 
-        self.hash_table = HashTable(10)
+        self.hash_table = HashTable(11)
 
         # Frame para controles
         self.control_frame = ttk.Frame(root, padding="10")

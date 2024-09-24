@@ -352,9 +352,15 @@ class AVLGUI(tk.Tk):
         if self.avl_tree.is_empty():
             self.invert_button.pack_forget()
             self.remove_button.pack_forget()
+            self.postorder_button.pack_forget()
+            self.inorder_button.pack_forget()
+            self.preorder_button.pack_forget()
         else:
             self.invert_button.pack()
             self.remove_button.pack()
+            self.postorder_button.pack()
+            self.inorder_button.pack()
+            self.preorder_button.pack()
 
 # Main
 if __name__ == "__main__":
