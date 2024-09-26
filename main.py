@@ -1,55 +1,15 @@
+import circular_queues.circular_linked_queue, circular_queues.circular_static_queue
+import deque.static_deque
+import graphs.graph
+import hash_table.hash_table
+import heap.min_heap
+import lists.doubly_linked_list, lists.linked_list
+import queues.dynamic_queue, queues.priority_queue, queues.static_queue
+import stacks.dynamic_stack, stacks.static_stack
+import trees.AVL_tree, trees.binary_search_tree
 
 import tkinter as tk
 from tkinter import ttk
-
-# Definição fictícia das classes das GUIs para estruturas de dados
-class CircularQueueGUI:
-    def __init__(self, root): pass
-
-class DequeGUI:
-    def __init__(self, root): pass
-
-class GraphGUI:
-    def __init__(self, graph): pass
-
-class HashTableGUI:
-    def __init__(self, root): pass
-
-class MinHeapGUI:
-    def __init__(self): pass
-
-class DoublyLinkedListGUI:
-    def __init__(self, root, size): pass
-
-class LinkedListGUI:
-    def __init__(self, root, size): pass
-
-class DynamicQueueGUI:
-    def __init__(self, root, size): pass
-
-class PriorityQueueGUI:
-    def __init__(self, root): pass
-
-class StaticQueueGUI:
-    def __init__(self, root, size): pass
-
-class DynamicStackGUI:
-    def __init__(self, root): pass
-
-class StaticStackGUI:
-    def __init__(self, root, size): pass
-
-class AVLTree: pass
-class AVLGUI:
-    def __init__(self, avl_tree): pass
-
-class BinarySearchTree: pass
-class BSTGUI:
-    def __init__(self, bst): pass
-
-class Graph:
-    def __init__(self): pass
-
 
 # Tela principal do visualizador
 class MainApp:
@@ -69,6 +29,7 @@ class MainApp:
             ("Listas Encadeadas", self.open_linked_list_menu),
             ("Tabelas Hash", self.open_hash_table_menu),
             ("Grafos", self.open_graph_menu),
+            ("Deque", self.open_deque_menu),
             ("Árvores", self.open_tree_menu),
             ("MinHeap", self.open_min_heap_menu)
         ]
@@ -113,7 +74,7 @@ class MainApp:
         label.pack(pady=10)
 
         for (text, command) in options:
-            button = tk.Button(new_win, text=text, width=20, command=lambda cmd=command, w=new_win: self.open_structure(cmd, w))
+            button = tk.Button(new_win, text=text, width=20, command=lambda cmd=command, w=new_win: self.open_structure(lambda: cmd(), w))
             button.pack(pady=5)
 
         # Botão de voltar para a tela principal
@@ -124,62 +85,66 @@ class MainApp:
         window.destroy()  # Fecha a janela de menu após escolher a estrutura
         command()  # Abre a janela da estrutura selecionada
 
-    # Funções de abertura das GUIs para estruturas de dados
+    # Funções de abertura das GUIs para estruturas de dados com o caminho completo
     def open_static_queue(self):
         root = tk.Toplevel(self.root)
-        StaticQueueGUI(root, 5)  # Exemplo de inicialização
+        queues.static_queue.StaticQueueGUI(root, 5)  # Caminho correto para StaticQueueGUI
 
     def open_dynamic_queue(self):
         root = tk.Toplevel(self.root)
-        DynamicQueueGUI(root, 5)
+        queues.dynamic_queue.DynamicQueueGUI(root, 5)  # Caminho correto para DynamicQueueGUI
 
     def open_priority_queue(self):
         root = tk.Toplevel(self.root)
-        PriorityQueueGUI(root)
+        queues.priority_queue.PriorityQueueGUI(root)  # Caminho correto para PriorityQueueGUI
 
     def open_circular_static_queue(self):
         root = tk.Toplevel(self.root)
-        CircularQueueGUI(root)
+        circular_queues.circular_static_queue.CircularQueueGUI(root)  # Caminho correto para CircularQueueGUI (estática)
 
     def open_circular_dynamic_queue(self):
         root = tk.Toplevel(self.root)
-        CircularQueueGUI(root)
+        circular_queues.circular_linked_queue.CircularQueueGUI(root)  # Caminho correto para CircularQueueGUI (dinâmica)
 
     def open_static_stack(self):
         root = tk.Toplevel(self.root)
-        StaticStackGUI(root, 5)
+        stacks.static_stack.StaticStackGUI(root, 5)  # Caminho correto para StaticStackGUI
 
     def open_dynamic_stack(self):
         root = tk.Toplevel(self.root)
-        DynamicStackGUI(root)
+        stacks.dynamic_stack.DynamicStackGUI(root)  # Caminho correto para DynamicStackGUI
 
     def open_linked_list(self):
         root = tk.Toplevel(self.root)
-        LinkedListGUI(root, 10)
+        lists.linked_list.LinkedListGUI(root, 10)  # Caminho correto para LinkedListGUI
 
     def open_doubly_linked_list(self):
         root = tk.Toplevel(self.root)
-        DoublyLinkedListGUI(root, 10)
+        lists.doubly_linked_list.DoublyLinkedListGUI(root, 10)  # Caminho correto para DoublyLinkedListGUI
 
     def open_hash_table_menu(self):
         root = tk.Toplevel(self.root)
-        HashTableGUI(root)
+        hash_table.hash_table.HashTableGUI(root)  # Caminho correto para HashTableGUI
 
     def open_graph_menu(self):
         root = tk.Toplevel(self.root)
-        GraphGUI(Graph())
+        graphs.graph.GraphGUI(graphs.graph.Graph())  # Caminho correto para GraphGUI
+      
+    def open_deque_menu(self):
+        root = tk.Toplevel(self.root)
+        deque.static_deque.DequeGUI(root)
 
     def open_min_heap_menu(self):
         root = tk.Toplevel(self.root)
-        MinHeapGUI()
+        heap.min_heap.MinHeapGUI()  # Caminho correto para MinHeapGUI
 
     def open_avl_tree(self):
-        avl_tree = AVLTree()
-        AVLGUI(avl_tree)
+        avl_tree = trees.AVL_tree.AVLTree()  # Caminho correto para AVLTree
+        trees.AVL_tree.AVLGUI(avl_tree)  # Caminho correto para AVLGUI
 
     def open_bst(self):
-        bst = BinarySearchTree()
-        BSTGUI(bst)
+        bst = trees.binary_search_tree.BinarySearchTree()  # Caminho correto para BinarySearchTree
+        trees.binary_search_tree.BSTGUI(bst)  # Caminho correto para BSTGUI
 
 # Execução da aplicação principal
 if __name__ == "__main__":
