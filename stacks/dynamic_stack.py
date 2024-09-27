@@ -142,13 +142,13 @@ class DynamicStackGUI:
         self.entry_data = tk.Entry(root)  # Campo de entrada para novos elementos
         self.entry_data.pack(side=tk.LEFT, padx=10, pady=10)
 
-        self.button_push = tk.Button(root, text="Inserir na Pilha", command=self.push)  # Botão para inserir
+        self.button_push = tk.Button(root, text="Inserir na Pilha", command=self.push, bg="lightblue", fg="black")  # Botão para inserir
         self.button_push.pack(side=tk.LEFT, padx=10, pady=10)
 
-        self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop)  # Botão para remover
+        self.button_pop = tk.Button(root, text="Remover da Pilha", command=self.pop, bg="lightblue", fg="black")  # Botão para remover
         self.button_pop.pack(side=tk.LEFT, padx=10, pady=10)
 
-        self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack)  # Botão para ordenar
+        self.button_sort = tk.Button(root, text="Ordenar a Pilha", command=self.sort_stack, bg="lightblue", fg="black")  # Botão para ordenar
         self.button_sort.pack(side=tk.LEFT, padx=10, pady=10)
 
         self.stack_items = []  # Lista para armazenar referências aos elementos da pilha

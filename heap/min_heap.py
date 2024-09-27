@@ -83,11 +83,11 @@ class MinHeapGUI(tk.Tk):
         self.entry.pack()
         
         # Botão para inserir no heap
-        self.insert_button = tk.Button(control_frame, text="Inserir", command=self.insert_value)
+        self.insert_button = tk.Button(control_frame, text="Inserir", command=self.insert_value, bg="lightblue", fg="black")
         self.insert_button.pack(pady=5)
         
         # Botão para extrair o mínimo
-        self.extract_button = tk.Button(control_frame, text="Extrair Min", command=self.extract_min)
+        self.extract_button = tk.Button(control_frame, text="Extrair Min", command=self.extract_min, bg="lightblue", fg="black")
         self.extract_button.pack(pady=5)
         
         # Label para exibir o conteúdo do heap (vetor)

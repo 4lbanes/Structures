@@ -186,19 +186,19 @@ class LinkedListGUI:
         self.entry_data = tk.Entry(root)
         self.entry_data.grid(row=1, column=1)
         
-        self.button_insert = tk.Button(root, text="Inserir em primeiro", command=self.insert)
+        self.button_insert = tk.Button(root, text="Inserir em primeiro", command=self.insert, bg="lightblue", fg="black")
         self.button_insert.grid(row=2, column=0, columnspan=2)
         
-        self.button_add = tk.Button(root, text="Inserir em último", command=self.add)
+        self.button_add = tk.Button(root, text="Inserir em último", command=self.add, bg="lightblue", fg="black")
         self.button_add.grid(row=2, column=1, columnspan=2)
         
-        self.button_remove_first = tk.Button(root, text="Remover Primeiro", command=self.remove_first)
+        self.button_remove_first = tk.Button(root, text="Remover Primeiro", command=self.remove_first, bg="lightblue", fg="black")
         self.button_remove_first.grid(row=3, column=0, columnspan=2)
         
-        self.button_remove_last = tk.Button(root, text="Remover Último", command=self.remove_last)
+        self.button_remove_last = tk.Button(root, text="Remover Último", command=self.remove_last, bg="lightblue", fg="black")
         self.button_remove_last.grid(row=3, column=1, columnspan=2)
         
-        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list) 
+        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list, bg="lightblue", fg="black") 
         self.button_sort.grid(row=4, column=2, padx=10, pady=5)
         
         self.canvas = tk.Canvas(root, bg="white", height=200, width=600)

@@ -88,13 +88,13 @@ class CircularQueueGUI:
         self.entry_data = tk.Entry(root)
         self.entry_data.grid(row=1, column=1)
         
-        self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue)
+        self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue, bg="lightblue", fg="black")
         self.button_enqueue.grid(row=2, column=0, columnspan=2)
         
-        self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)
+        self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue, bg="lightblue", fg="black")
         self.button_dequeue.grid(row=3, column=0, columnspan=2)
 
-        self.button_sort = tk.Button(root, text="Ordenar Fila", command=self.sort_queue)
+        self.button_sort = tk.Button(root, text="Ordenar Fila", command=self.sort_queue, bg="lightblue", fg="black")
         self.button_sort.grid(row=4, column=0, columnspan=2)
 
         self.queue_items = []  # Armazena os retângulos e textos na tela

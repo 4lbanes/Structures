@@ -68,16 +68,16 @@ class DequeGUI:
         self.btn_frame = tk.Frame(root)
         self.btn_frame.pack(pady=10)
 
-        self.insert_btn = tk.Button(self.btn_frame, text="Inserir em Primeiro", command=self.insert_first)
+        self.insert_btn = tk.Button(self.btn_frame, text="Inserir em Primeiro", command=self.insert_first, bg="lightblue", fg="black")
         self.insert_btn.grid(row=0, column=0, padx=5)
 
-        self.add_btn = tk.Button(self.btn_frame, text="Adicionar em Último", command=self.add_last)
+        self.add_btn = tk.Button(self.btn_frame, text="Adicionar em Último", command=self.add_last, bg="lightblue", fg="black")
         self.add_btn.grid(row=0, column=1, padx=5)
 
-        self.remove_first_btn = tk.Button(self.btn_frame, text="Remover Primeiro", command=self.remove_first)
+        self.remove_first_btn = tk.Button(self.btn_frame, text="Remover Primeiro", command=self.remove_first, bg="lightblue", fg="black")
         self.remove_first_btn.grid(row=0, column=2, padx=5)
 
-        self.remove_last_btn = tk.Button(self.btn_frame, text="Remover Último", command=self.remove_last)
+        self.remove_last_btn = tk.Button(self.btn_frame, text="Remover Último", command=self.remove_last, bg="lightblue", fg="black")
         self.remove_last_btn.grid(row=0, column=3, padx=5)
 
         # Rótulo para mostrar as fórmulas usadas na operação

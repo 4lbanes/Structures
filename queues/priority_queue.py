@@ -116,10 +116,10 @@ class PriorityQueueGUI:
         self.entry_priority.grid(row=3, column=1)
         
         # Botões de interação
-        self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue)  # Botão para inserir
+        self.button_enqueue = tk.Button(root, text="Inserir na Fila", command=self.enqueue, bg="lightblue", fg="black")  # Botão para inserir
         self.button_enqueue.grid(row=4, column=0, columnspan=2)
         
-        self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue)  # Botão para remover
+        self.button_dequeue = tk.Button(root, text="Remover da Fila", command=self.dequeue, bg="lightblue", fg="black")  # Botão para remover
         self.button_dequeue.grid(row=5, column=0, columnspan=2)
 
         self.queue_items = []  # Armazena os retângulos e textos na tela

@@ -190,23 +190,20 @@ class DoublyLinkedListGUI:
         self.entry_data = tk.Entry(root)
         self.entry_data.grid(row=1, column=1)
         
-        self.button_insert = tk.Button(root, text="Inserir em primeiro", command=self.insert)
+        self.button_insert = tk.Button(root, text="Inserir em primeiro", command=self.insert, bg="lightblue", fg="black")
         self.button_insert.grid(row=2, column=0, columnspan=2)
         
-        self.button_add = tk.Button(root, text="Inserir em último", command=self.add)
+        self.button_add = tk.Button(root, text="Inserir em último", command=self.add, bg="lightblue", fg="black")
         self.button_add.grid(row=2, column=1, columnspan=2)
         
-        self.button_remove_first = tk.Button(root, text="Remover Primeiro", command=self.remove_first)
+        self.button_remove_first = tk.Button(root, text="Remover Primeiro", command=self.remove_first, bg="lightblue", fg="black")
         self.button_remove_first.grid(row=3, column=0, columnspan=2)
         
-        self.button_remove_last = tk.Button(root, text="Remover Último", command=self.remove_last)
+        self.button_remove_last = tk.Button(root, text="Remover Último", command=self.remove_last, bg="lightblue", fg="black")
         self.button_remove_last.grid(row=3, column=1, columnspan=2)
         
-        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list) 
+        self.button_sort = tk.Button(root, text="Ordenar", command=self.sort_list, bg="lightblue", fg="black") 
         self.button_sort.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
-        
-        self.button_reverse = tk.Button(root, text="Exibir Reverso", command=self.print_reverse)
-        self.button_reverse.grid(row=4, column=1, columnspan=3, padx=10, pady=5)
         
         self.canvas = tk.Canvas(root, bg="white", height=600, width=1000)
         self.canvas.grid(row=7, column=0, columnspan=2)
@@ -261,21 +258,16 @@ class DoublyLinkedListGUI:
     def update_list_display(self):
         self.draw_doubly_linked_list()
     
-    def print_reverse(self):
-        self.draw_doubly_linked_list(reverse=True)
-    
     def update_buttons_visibility(self):
         """Atualiza a visibilidade dos botões dependendo do estado da lista."""
         if self.linked_list.is_empty():
             self.button_remove_first.grid_remove()
             self.button_remove_last.grid_remove()
             self.button_sort.grid_remove()
-            self.button_reverse.grid_remove()
         else:
             self.button_remove_first.grid()
             self.button_remove_last.grid()
             self.button_sort.grid()
-            self.button_reverse.grid()
             
     def draw_doubly_linked_list(self, reverse = False):
      self.canvas.delete("all")

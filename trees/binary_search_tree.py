@@ -172,26 +172,26 @@ class BSTGUI(tk.Tk):
         self.insert_label.pack()
         self.insert_entry = tk.Entry(self.left_frame)
         self.insert_entry.pack()
-        self.insert_button = tk.Button(self.left_frame, text="Inserir", command=self.insert_node)
+        self.insert_button = tk.Button(self.left_frame, text="Inserir", command=self.insert_node, bg="lightblue", fg="black")
         self.insert_button.pack()
         
         self.remove_label = tk.Label(self.left_frame, text="Remover elemento:")
         self.remove_label.pack()
         self.remove_entry = tk.Entry(self.left_frame)
         self.remove_entry.pack()
-        self.remove_button = tk.Button(self.left_frame, text="Remover", command=self.remove_node)
+        self.remove_button = tk.Button(self.left_frame, text="Remover", command=self.remove_node, bg="lightblue", fg="black")
         self.remove_button.pack()
 
-        self.invert_button = tk.Button(self.left_frame, text="Inverter Árvore", command=self.invert_tree)
+        self.invert_button = tk.Button(self.left_frame, text="Inverter Árvore", command=self.invert_tree, bg="lightblue", fg="black")
         self.invert_button.pack()
 
-        self.inorder_button = tk.Button(self.left_frame, text="In-order", command=self.show_inorder)
+        self.inorder_button = tk.Button(self.left_frame, text="In-order", command=self.show_inorder, bg="lightblue", fg="black")
         self.inorder_button.pack()
         
-        self.preorder_button = tk.Button(self.left_frame, text="Pre-order", command=self.show_preorder)
+        self.preorder_button = tk.Button(self.left_frame, text="Pre-order", command=self.show_preorder, bg="lightblue", fg="black")
         self.preorder_button.pack()
         
-        self.postorder_button = tk.Button(self.left_frame, text="Post-order", command=self.show_postorder)
+        self.postorder_button = tk.Button(self.left_frame, text="Post-order", command=self.show_postorder, bg="lightblue", fg="black")
         self.postorder_button.pack()
 
         self.output_text = tk.Text(self.left_frame, height=10, width=30)
