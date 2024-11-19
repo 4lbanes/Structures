@@ -1,6 +1,7 @@
 import tkinter as tk
 import time
 
+# Classe que representa um nó da árvore AVL
 class Node:
     def __init__(self, key):
         self.left = None
@@ -8,6 +9,7 @@ class Node:
         self.value = key
         self.height = 1
 
+# Classe que representa a Árvore AVL
 class AVLTree:
     def __init__(self):
         self.root = None
@@ -27,36 +29,34 @@ class AVLTree:
         if node is None:
             return 0
         return self.height(node.left) - self.height(node.right)
-    
-    def right_rotation(self, y, gui):
-     x = y.left
-     T2 = x.right
-     gui.show_balance_message(f"Realizando rotação direita. X: {x.value}, Y: {y.value}, T2: {T2.value}")
-     x.right = y
-     y.left = T2
-     self.update_height(y)
-     self.update_height(x)
-     gui.highlight_node(x.value, "green")
-     gui.highlight_node(y.value, "red")
-     gui.update()
-     time.sleep(1)
 
-     return x
+    def right_rotation(self, y, gui):
+        x = y.left
+        T2 = x.right
+        x.right = y
+        y.left = T2
+        self.update_height(y)
+        self.update_height(x)
+        gui.show_balance_message("Balanceamento para a direita")
+        gui.highlight_node(x.value, "green")
+        gui.highlight_node(y.value, "red")
+        gui.update()
+        time.sleep(1)
+        return x
 
     def left_rotation(self, x, gui):
-     y = x.right
-     T2 = y.left
-     gui.show_balance_message(f"Realizando rotação esquerda. X: {x.value}, Y: {y.value}, T2: {T2.value}")
-     y.left = x
-     x.right = T2
-     self.update_height(x)
-     self.update_height(y)
-     gui.highlight_node(y.value, "green")
-     gui.highlight_node(x.value, "red")
-     gui.update()
-     time.sleep(1)
-
-     return y
+        y = x.right
+        T2 = y.left
+        y.left = x
+        x.right = T2
+        self.update_height(x)
+        self.update_height(y)
+        gui.show_balance_message("Balanceamento para a esquerda")
+        gui.highlight_node(y.value, "green")
+        gui.highlight_node(x.value, "red")
+        gui.update()
+        time.sleep(1)
+        return y
 
     def balance(self, node, gui):
         bf = self.balance_factor(node)
@@ -85,7 +85,7 @@ class AVLTree:
         if node is None:
             return Node(key)
         if gui:
-            gui.highlight_node(node.value, "yellow") 
+            gui.highlight_node(node.value, "yellow")  
             gui.update()
             time.sleep(1)
 
@@ -205,6 +205,7 @@ class AVLTree:
             self._invert(root.left)
             self._invert(root.right)
 
+# Classe da Interface Gráfica
 class AVLGUI(tk.Tk):
     def __init__(self, avl_tree):
         super().__init__()
@@ -246,15 +247,14 @@ class AVLGUI(tk.Tk):
         self.output_text = tk.Text(self.left_frame, height=10, width=30)
         self.output_text.pack()
 
-        self.node_radius = 20 
+        self.node_radius = 15
         self.horizontal_spacing = 100 
-        self.vertical_spacing = 80 
+        self.vertical_spacing = 80
         self.x_start = 400
         self.y_start = 50
         self.node_positions = {}
         self.current_lines = []
         self.draw_tree(self.avl_tree.root, self.x_start, self.y_start, 1)
-        self.canvas.bind("<Button-1>", self.on_click)
 
     def draw_tree(self, node, x, y, level):
         if node:
@@ -284,7 +284,7 @@ class AVLGUI(tk.Tk):
         self.output_text.see(tk.END)
 
     def show_comparison(self, node_value, key_value, operator):
-        self.output_text.insert(tk.END, f"{node_value} {operator} {key_value}\n")
+        self.output_text.insert(tk.END, f"Comparando {node_value} {operator} {key_value}\n")
         self.output_text.see(tk.END)
 
     def update(self):
@@ -324,4 +324,4 @@ class AVLGUI(tk.Tk):
 
 avl_tree = AVLTree()
 app = AVLGUI(avl_tree)
-app.mainloop()
+app.mainloop()  
